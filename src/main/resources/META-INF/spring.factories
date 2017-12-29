@@ -6,4 +6,5 @@ com.chen.spring.boot.CustomFilter,\
 com.chen.spring.boot.CustomContextParam,\
 com.chen.spring.boot.InterceptorConfig,\
 com.chen.spring.boot.TransactionConfig,\
-com.chen.spring.boot.SpringContextHolder
+com.chen.spring.boot.SpringContextHolder,\
+com.chen.spring.boot.swagger.SwaggerConfig
