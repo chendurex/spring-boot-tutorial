@@ -1,0 +1,9 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.chen.spring.boot.BasicConfig,\
+com.chen.spring.boot.PropertiesConfig,\
+com.chen.spring.boot.CustomListener,\
+com.chen.spring.boot.CustomFilter,\
+com.chen.spring.boot.CustomContextParam,\
+com.chen.spring.boot.InterceptorConfig,\
+com.chen.spring.boot.TransactionConfig,\
+com.chen.spring.boot.SpringContextHolder
