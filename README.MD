@@ -221,8 +221,8 @@
         因此， Eureka可以很好的应对因网络故障导致部分节点失去联系的情况，而不会像zookeeper那样使整个注册服务瘫痪。
 
   + `eureka`一些可能需要的配置介绍：[所有配置说明传送门](http://cloud.spring.io/spring-cloud-static/Finchley.M2/#_appendix_compendium_of_configuration_properties)
-    + `eureka.server.eviction-interval-timer-in-ms` ：服务端自动移除过期的客户端(以毫秒为单位，默认是60秒)，如果在网络不稳定的情况，可以适当提高当前值(以当前时间间隔检查并移除过期的客户端，判断是否过期由`eureka.instance.lease-expiration-duration-in-seconds`确定)
-    + `eureka.server.enable-self-preservation` ：是否开启自我保护模式，默认为`true`。默认情况下，如果Eureka Server在一定时间内没有接收到某个微服务实例的心跳，Eureka Server将会注销该实例（默认90秒）。
+   + `eureka.server.eviction-interval-timer-in-ms` ：服务端自动移除过期的客户端(以毫秒为单位，默认是60秒)，如果在网络不稳定的情况，可以适当提高当前值(以当前时间间隔检查并移除过期的客户端，判断是否过期由`eureka.instance.lease-expiration-duration-in-seconds`确定)
+   + `eureka.server.enable-self-preservation` ：是否开启自我保护模式，默认为`true`。默认情况下，如果Eureka Server在一定时间内没有接收到某个微服务实例的心跳，Eureka Server将会注销该实例（默认90秒）。
        但是当网络分区故障发生时，微服务与Eureka Server之间无法正常通信，以上行为可能变得非常危险了——因为微服务本身其实是健康的，此时本不应该注销这个微服务。Eureka通过“自我保护模式”来解决这个问题——
        当Eureka Server节点在短时间内丢失过多客户端时（可能发生了网络分区故障），那么这个节点就会进入自我保护模式。一旦进入该模式，Eureka Server就会保护服务注册表中的信息，不再删除服务注册表中的数据（也就是不会注销任何微服务）。
        当网络故障恢复后，该Eureka Server节点会自动退出自我保护模式。综上，自我保护模式是一种应对网络异常的安全保护措施。它的架构哲学是宁可同时保留所有微服务（健康的微服务和不健康的微服务都会保留），
@@ -232,10 +232,10 @@
     + `eureka.client.serviceUrl.defaultZone` ： 客户端向服务端发送注册请求地址，注意端口号要跟tomcat端口号一致
     + `eureka.client.register-with-eureka` ： 表示是否将自己注册到`Eureka Server`，默认为`true`(如果是服务器，则改为`false`)
     + `eureka.client.fetch-registry` ：  表示是否从`Eureka Server`获取注册信息，默认为`true`(如果是服务器，则改为`false`)
-    + `eureka.instance.lease-expiration-duration-in-seconds` ：表示eureka server至上一次收到client的心跳之后，等待下一次心跳的超时时间，在这个时间内若没收到下一次心跳，则将移除该客户端(默认90秒)，
-        如果该值太大，则很可能将流量转发过去的时候，该instance已经不存活了；如果该值设置太小了，则instance则很可能因为临时的网络抖动而被摘除掉；该值至少应该大于`lease-renewal-interval-in-seconds`(内部通过一个`lastUpdateTimestamp`确定，`lastUpdateTimestamp = System.currentTimeMillis() + duration`。注意：这个最后更新时间等于当前时间+过期间隔，而服务端移除客户端时，也是`lastUpdateTimestamp+duration`，所以服务端真正移除客户端的时间公式为：`remove-time<=eureka.server.eviction-interval-timer-in-ms+eureka.instance.lease-expiration-duration-in-seconds*2`)
+    + `eureka.instance.lease-expiration-duration-in-seconds` ：表示eureka server至上一次收到client的心跳之后，等待下一次心跳的超时时间，在这个时间内若没收到下一次心跳，则将移除该客户端(默认90秒)，如果该值太大，则很可能将流量转发过去的时候，该instance已经不存活了；如果该值设置太小了，则instance则很可能因为临时的网络抖动而被摘除掉；该值至少应该大于`lease-renewal-interval-in-seconds`(内部通过一个`lastUpdateTimestamp`确定，`lastUpdateTimestamp = System.currentTimeMillis() + duration`。注意：这个最后更新时间等于当前时间+过期间隔，而服务端移除客户端时，也是`lastUpdateTimestamp+duration`，所以服务端真正移除客户端的时间公式为：`remove-time<=eureka.server.eviction-interval-timer-in-ms+eureka.instance.lease-expiration-duration-in-seconds*2`)
    + `eureka.instance.lease-renewal-interval-in-seconds` ：客户端发送心跳给服务端的频率。如果在`lease-expiration-duration-in-seconds`后，服务端没有收到客户端的心跳，
         则将移除当前客户端。另外，如果当前客户端实现了`HealthCheckCallback`，并决定让自己`unavailable`的话，则该客户端也不会接收到流量(默认30秒)
+     + `eureka.instance.lease-renewal-interval-in-seconds`与`eureka.instance.lease-expiration-duration-in-seconds`是配置在客户端，而不是服务端，也就是说服务端针对每个不同的客户端实现不同的移除策略
    + `eureka.client.registry-fetch-interval-seconds` ：客户端从服务端获取注册信息的频率(默认30秒)，如果消费者对提供者要求比较高的成功率，则降低这个时间
    + `eureka.client.eureka-server-total-connections` ：客户端对所有服务端最大的连接数(默认200)，
    + `eureka.client.eureka-server-total-connections-per-host` ：客户端针对单个服务端最大的连接数(默认50)
