@@ -59,19 +59,6 @@
     
   + 通过命令行构建项目是`war`包，然后按照`war`项目部署
 
-
-#### 本地如何方便开发(仅对`idea`用户有效)
-  + 在部署项目的时候，让工具自动帮我们构建项目，然后再部署，那这样就不用人为的先通过命令行构建再部署了，然后如下图操作：
-     + ![](http://note.youdao.com/yws/api/personal/file/8B6D02A7DA974889B5EF8A5B348918EF?method=download&shareKey=f770d6354fe14b5da38acc35a9305ca6)
-     + ![](http://note.youdao.com/yws/api/personal/file/3112775C58DC4EBFA49CB01E7288E7B6?method=download&shareKey=42081233e97198a4429f474ad60026c6)
-     + ![](https://note.youdao.com/yws/api/personal/file/72503730C73A44E6B872EF92BB810DE8?method=download&shareKey=aeb363f3bdfc7d6fbc49687f283ae4ec)
-     + ![](https://note.youdao.com/yws/api/personal/file/599C23F357D24ADC9A8ECA2BE8A827A9?method=download&shareKey=3600dec50362043cde4c041ea8050636)
-  + 如果在构建或者部署时出现类似这样的错误：`Unable to delete file: D:\chen_project\chen-hr-perf\chen-perf-service\build\libs\chen-perf-service-1.0.8-SNAPSHOT.jar`
-     那么请大家打开任务管理器，找到顶部的`java.exe`程序，然后选择删除一个试试能不能构建，不能则再删除，直到可以构建为止。
-      原因是在大家使用`idea`的命令行或者构建工具时，都会开启一个程序执行，并且会一直保持程序的运行，那如果在先使用命令行执行构建的话，然后再启动项目时，
-      因为在启动项目的时候又会构建一次，但是前面构建产生的文件已经被第一个构建所绑定了，所以第二次构建的时候是不能再次操作文件，导致构建失败，所以大家直接部署
-      项目就好，不要先构建再部署，防止出现这种不可避免的问题
-
 #### 如何使用测试
 
         @RunWith(SpringRunner.class)
@@ -220,7 +207,7 @@
         3. 当网络稳定时，当前实例新的注册信息会被同步到其它节点中
         因此， Eureka可以很好的应对因网络故障导致部分节点失去联系的情况，而不会像zookeeper那样使整个注册服务瘫痪。
 
-  + `eureka`一些可能需要的配置介绍：[所有配置说明传送门](http://cloud.spring.io/spring-cloud-static/Finchley.M2/#_appendix_compendium_of_configuration_properties)
++ `eureka`一些可能需要的配置介绍：[所有配置说明传送门](http://cloud.spring.io/spring-cloud-static/Finchley.M2/#_appendix_compendium_of_configuration_properties)
    + `eureka.server.eviction-interval-timer-in-ms` ：服务端自动移除过期的客户端(以毫秒为单位，默认是60秒)，如果在网络不稳定的情况，可以适当提高当前值(以当前时间间隔检查并移除过期的客户端，判断是否过期由`eureka.instance.lease-expiration-duration-in-seconds`确定)
    + `eureka.server.enable-self-preservation` ：是否开启自我保护模式，默认为`true`。默认情况下，如果Eureka Server在一定时间内没有接收到某个微服务实例的心跳，Eureka Server将会注销该实例（默认90秒）。
        但是当网络分区故障发生时，微服务与Eureka Server之间无法正常通信，以上行为可能变得非常危险了——因为微服务本身其实是健康的，此时本不应该注销这个微服务。Eureka通过“自我保护模式”来解决这个问题——
@@ -232,10 +219,25 @@
     + `eureka.client.serviceUrl.defaultZone` ： 客户端向服务端发送注册请求地址，注意端口号要跟tomcat端口号一致
     + `eureka.client.register-with-eureka` ： 表示是否将自己注册到`Eureka Server`，默认为`true`(如果是服务器，则改为`false`)
     + `eureka.client.fetch-registry` ：  表示是否从`Eureka Server`获取注册信息，默认为`true`(如果是服务器，则改为`false`)
-    + `eureka.instance.lease-expiration-duration-in-seconds` ：表示eureka server至上一次收到client的心跳之后，等待下一次心跳的超时时间，在这个时间内若没收到下一次心跳，则将移除该客户端(默认90秒)，如果该值太大，则很可能将流量转发过去的时候，该instance已经不存活了；如果该值设置太小了，则instance则很可能因为临时的网络抖动而被摘除掉；该值至少应该大于`lease-renewal-interval-in-seconds`(内部通过一个`lastUpdateTimestamp`确定，`lastUpdateTimestamp = System.currentTimeMillis() + duration`。注意：这个最后更新时间等于当前时间+过期间隔，而服务端移除客户端时，也是`lastUpdateTimestamp+duration`，所以服务端真正移除客户端的时间公式为：`remove-time<=eureka.server.eviction-interval-timer-in-ms+eureka.instance.lease-expiration-duration-in-seconds*2`)
+    + `eureka.instance.lease-expiration-duration-in-seconds` ：表示eureka server至上一次收到client的心跳之后，等待下一次心跳的超时时间，在这个时间内若没收到下一次心跳，则将移除该客户端(默认90秒)，如果该值太大，则很可能将流量转发过去的时候，该instance已经不存活了；如果该值设置太小了，则instance则很可能因为临时的网络抖动而被摘除掉；该值至少应该大于`lease-renewal-interval-in-seconds`
    + `eureka.instance.lease-renewal-interval-in-seconds` ：客户端发送心跳给服务端的频率。如果在`lease-expiration-duration-in-seconds`后，服务端没有收到客户端的心跳，
         则将移除当前客户端。另外，如果当前客户端实现了`HealthCheckCallback`，并决定让自己`unavailable`的话，则该客户端也不会接收到流量(默认30秒)
      + `eureka.instance.lease-renewal-interval-in-seconds`与`eureka.instance.lease-expiration-duration-in-seconds`是配置在客户端，而不是服务端，也就是说服务端针对每个不同的客户端实现不同的移除策略
+   + 服务端移除过期客户端规则：客户端会定期向服务端发送心跳，设置参数为`eureka.instance.lease-renewal-interval-in-seconds`，发送成功后，服务端会更新过期时间，`lastUpdateTimestamp`=`CurrentTime`+`eureka.instance.lease-expiration-duration-in-seconds`。服务端也会定期的清理过期的客户端，时间间隔参数设置为：`eureka.server.eviction-interval-timer-in-ms`，清理的规则为：`CurrentTime>lastUpdateTimestamp+eureka.instance.lease-expiration-duration-in-seconds`，所以服务端真正移除客户端的时间公式为：remove-time<=eureka.server.eviction-interval-timer-in-ms+eureka.instance.lease-expiration-duration-in-seconds*2)，源码如下：
+       
+            public void renew() {
+            lastUpdateTimestamp = System.currentTimeMillis() + duration;
+    
+        }
+
+           public boolean isExpired(long additionalLeaseMs) {
+            return (evictionTimestamp > 0 || System.currentTimeMillis() > (lastUpdateTimestamp + duration + additionalLeaseMs));
+        }
+   + [客户端注册到服务器生效时间，最高延迟可以达到2min分钟(失效时间类似)](https://blog.asarkar.org/technical/netflix-eureka/)：
+     + 如果是客户端第一次启动，根据`eureka.instance.lease-renewal-interval-in-seconds`配置发送第一次租约请求，所以这里最大可能耗费默认的30s
+     + 服务端响应数据设置了缓存，可以修改配置`eureka.server.responseCacheUpdateIntervalMs`，默认30s
+     + 客户端维护了一份本地缓存，防止每次获取服务都向服务端发送请求，可以修改配置`eureka.client.registry-fetch-interval-seconds`，默认30s
+     + 负载均衡维护了一份缓存，防止每次获取数据都向客户端获取数据，可以修改配置`Ribbon.ServerListRefreshInterval`，默认30s
    + `eureka.client.registry-fetch-interval-seconds` ：客户端从服务端获取注册信息的频率(默认30秒)，如果消费者对提供者要求比较高的成功率，则降低这个时间
    + `eureka.client.eureka-server-total-connections` ：客户端对所有服务端最大的连接数(默认200)，
    + `eureka.client.eureka-server-total-connections-per-host` ：客户端针对单个服务端最大的连接数(默认50)
