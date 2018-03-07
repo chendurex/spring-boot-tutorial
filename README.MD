@@ -245,6 +245,53 @@
    + `eureka.client.eureka-server-connect-timeout-seconds` ：客户端与服务端建立连接的超时时间(默认5秒)
    + `eureka.client.eureka-connection-idle-timeout-seconds` ：客户端与服务端建立的连接在某个间隔时间未使用后自动回收(默认30秒)
 
+#### 集群部署方式
+   + `eureka`通过`spring.application.name`是否相同来确定多个服务间是否属于集群模式
+   + `eureka server`也设计成属于`client`，实现集群时，需要将自己作为客户端向其它服务端注册。在检测是否存在集群时，通过将所有客户端的域名地址
+         与本服务端的`eureka.instance.hostname`值进行比较，如果相同，则表示这两台服务属于集群
+   + 由于`eureka.instance.hostname`不能以`IP`的方式发布，所以必须使用域名进行注册发布服务，当然也需要在`/etc/hosts`上配置相关的域名
+   + 如果发布成功，则可以通过控制台查看`available-replicas`是否有期望的服务地址
+   +  
+           ----------cluster1 conf
+                 eureka:
+                   instance:
+                     hostname: eureka.tutorial
+                   client:
+                     serviceUrl:
+                       defaultZone: http://eureka.tutorial.backup:8762/eureka/
+                 spring:
+                   application:
+                     name: eureka-tutorial-application
+           ----------cluster2 conf
+                        eureka:
+                          instance:
+                            hostname: eureka.tutorial.backup
+                          client:
+                            serviceUrl:
+                              defaultZone: http://eureka.tutorial:8761/eureka/
+                        spring:
+                          application:
+                            name: eureka-tutorial-application      
+
+  + 客户端通过配置多个地址实现`HA`：
+      
+          eureka:
+            client:
+              serviceUrl:
+                defaultZone: http://eureka.tutorial:8761/eureka/,http://eureka.tutorial.backup:8762/eureka/
+
+#### 集群策略
+  + 客户端交互：客户端仅与其中的一台服务器发送心跳检测，其它的服务器负责更新数据，默认是按照`defaultZone`定义的先后顺序向服务器发送心跳检测
+  + 服务稳定性：
+    + 服务器与客户端之间，服务器与服务器之间的数据交互和心跳检测，都是`http`长连接，内部有个线程专门负责监控链接情况，所以消耗比较小。
+    + 服务器需要控制连接数量，防止出现主从模式(即一台服务器负责所有的客户端连接，另外的服务器仅仅是作为备用服务器)，所以在配置时，多个服务器地址最好是分区的(`zone node`)，
+      按最短，最近路由原则。如果在同一个分区，那么客户端也需要负载轮训服务端
+  + 服务性能：不论客户端与服务端交互，还是服务端与服务端交互，还是客户端与客户端等交互，都是使用`http`长连接模式，所以性能比普通的`http`短连接高很多    
+  + 备份数据策略：集群间会定时的获取对等方数据，然后更新数据
+  + 节点宕机策略：如果服务器发生异常(网络异常或者服务器故障)，那么客户端会自动选择其它的服务器再次发送心跳检测，如果检测成功，那么客户端后续将与另外的服务器发生心跳检测
+#### [一些可能用到的参数介绍](http://cloud.spring.io/spring-cloud-static/Finchley.M5/single/spring-cloud.html#_appendix_compendium_of_configuration_properties)
+  + eureka.server.max-time-for-replication：集群同步最长间隔时间，默认30s
+ 
 #### swagger引入理由
   + 由于接口众多，并且细节复杂（需要考虑不同的HTTP请求类型、HTTP头部信息、HTTP请求内容等），高质量地创建这份文档本身就是件非常吃力的事，下游的抱怨声不绝于耳
   + 随着时间推移，不断修改接口实现的时候都必须同步修改接口文档，而文档与代码又处于两个不同的媒介，除非有严格的管理机制，不然很容易导致不一致现象
