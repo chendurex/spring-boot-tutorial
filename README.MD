@@ -243,7 +243,9 @@
    + `eureka.client.eureka-server-total-connections-per-host` ：客户端针对单个服务端最大的连接数(默认50)
    + `eureka.client.eureka-server-read-timeout-seconds` ：客户端发送请求到服务端的超时时间(默认8秒)
    + `eureka.client.eureka-server-connect-timeout-seconds` ：客户端与服务端建立连接的超时时间(默认5秒)
-   + `eureka.client.eureka-connection-idle-timeout-seconds` ：客户端与服务端建立的连接在某个间隔时间未使用后自动回收(默认30秒)
+   + `eureka.client.eureka-connection-idle-timeout-seconds` ：客户端连接最大空闲时间(客户端之间的交互也是`http`长连接，超过设置的空闲时间自动回收,默认30秒)
+   + `eureka.server.peer-node-connection-idle-timeout-seconds`：集群间连接(心跳检测或者数据同步的`http`连接)最大空闲时间，默认30s
+   + `eureka.server.max-time-for-replication`：集群同步最长间隔时间，默认30s
 
 #### 集群部署方式
    + `eureka`通过`spring.application.name`是否相同来确定多个服务间是否属于集群模式
@@ -286,11 +288,9 @@
     + 服务器与客户端之间，服务器与服务器之间的数据交互和心跳检测，都是`http`长连接，内部有个线程专门负责监控链接情况，所以消耗比较小。
     + 服务器需要控制连接数量，防止出现主从模式(即一台服务器负责所有的客户端连接，另外的服务器仅仅是作为备用服务器)，所以在配置时，多个服务器地址最好是分区的(`zone node`)，
       按最短，最近路由原则。如果在同一个分区，那么客户端也需要负载轮训服务端
-  + 服务性能：不论客户端与服务端交互，还是服务端与服务端交互，还是客户端与客户端等交互，都是使用`http`长连接模式，所以性能比普通的`http`短连接高很多    
+  + 服务性能：不论客户端与服务端交互，还是服务端与服务端交互，还是客户端与客户端等交互，都是使用`http`长连接模式，所以性能比普通的`http`短连接高很多，可以通过设置`eureka.client.eureka-connection-idle-timeout-seconds`/`eureka.server.peer-node-connection-idle-timeout-seconds`控制连接生存周期    
   + 备份数据策略：集群间会定时的获取对等方数据，然后更新数据
   + 节点宕机策略：如果服务器发生异常(网络异常或者服务器故障)，那么客户端会自动选择其它的服务器再次发送心跳检测，如果检测成功，那么客户端后续将与另外的服务器发生心跳检测
-#### [一些可能用到的参数介绍](http://cloud.spring.io/spring-cloud-static/Finchley.M5/single/spring-cloud.html#_appendix_compendium_of_configuration_properties)
-  + eureka.server.max-time-for-replication：集群同步最长间隔时间，默认30s
  
 #### swagger引入理由
   + 由于接口众多，并且细节复杂（需要考虑不同的HTTP请求类型、HTTP头部信息、HTTP请求内容等），高质量地创建这份文档本身就是件非常吃力的事，下游的抱怨声不绝于耳
