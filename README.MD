@@ -303,7 +303,7 @@
   + 因为是`rest api`，所以生成的文档都必须标注为`RestController`
   + 每个`controller`、`method`、`parameter`、`RequestBody`、`ResponseBody`、`Model`、`Model.Field`都必须写上注释
   + 默认是所有的`controller`、`method`都提供文档，如果某个`controller`或者某个`method`不需要提供出来，那么请添加隐藏注解
-
+  + 如果是配置了`hystrix`和`ribbon`，那么一定要注意`hystrix`的超时时间大于`ribbon`最大重试次数的超时时间，防止提前进入超时
 #### demo
   + `controller`定义
   + ![](http://note.youdao.com/yws/api/personal/file/F210B1A196E34EDC868D7FC129D52CDC?method=download&shareKey=37bdcaa87b73934ed7c67c090358aedd)
