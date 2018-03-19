@@ -1,6 +1,6 @@
 ### 一、简介
-  + 说明：这是一个`springboot`框架，完全采用`springboot`进行开发的框架(version:`1.5.6.RELEASE`)
-  + Spring Boot提供了一个快速（和自治的）的方式来创建一个基于Spring的生产环境。它是基于Spring框架，支持约定优于配置，并且被设计成尽可能快地让你启动和运行程序。[传送门](https://docs.spring.io/spring-boot/docs/1.5.6.RELEASE/reference/htmlsingle/)
+  + 说明：这是一个`springboot`框架，完全采用`springboot`进行开发的框架(version:`2.0.0.RELEASE`)
+  + Spring Boot提供了一个快速（和自治的）的方式来创建一个基于Spring的生产环境。它是基于Spring框架，支持约定优于配置，并且被设计成尽可能快地让你启动和运行程序。[传送门](https://docs.spring.io/spring-boot/docs/2.0.0.RELEASE/reference/htmlsingle/)
   
 #### 目前遇见的问题以及引入`springboot`理由
   + 第一次部署项目的时候，需要将项目与`tomcat`集成，或者在修改配置、增加依赖的时候，也有可能需要再次配置`tomcat`，这是一个重复而且繁琐的过程，希望能避免
@@ -34,7 +34,7 @@
 #### 如何部署项目
   + 项目构建是基于`gradle 4.+`版本，所以构建之前，请确定你的版本是否正确
   + 请确认项目配置文件`application.properties`位于根目录下
-  + `gradle.build`按如下方式修改(除了修改`pro_name`和`childVersion`其它的保持一致)：
+  + `gradle.build`按如下方式修改(除了修改`pro_name`和`child_version`其它的保持一致)：
     
             ext{
                 pro_type    = 'boot'// springboot项目则改为boot
@@ -58,6 +58,7 @@
             }
     
   + 通过命令行构建项目是`war`包，然后按照`war`项目部署
+
 
 #### 如何使用测试
 
@@ -171,8 +172,8 @@
     包括开发人员自己的笔记本电脑，裸机数据中心，以及`Cloud Foundry`等托管平台
   + 以下为`Spring Cloud`的核心特性：
     + 服务注册和发现(`eureka`)
-    + 服务与服务调用(`eureka`)
-    + 路由和服务网关(`zuul`)
+    + 服务与服务调用(`feign`)
+    + 路由和服务网关(`zuul`/`spring cloud api gateway`)
     + 负载均衡(`ribbon`)
     + 断路器(`hystrix`)
     + 分布式链路跟踪器(`sleuth`/`zipkin`)
@@ -207,7 +208,7 @@
         3. 当网络稳定时，当前实例新的注册信息会被同步到其它节点中
         因此， Eureka可以很好的应对因网络故障导致部分节点失去联系的情况，而不会像zookeeper那样使整个注册服务瘫痪。
 
-+ `eureka`一些可能需要的配置介绍：[所有配置说明传送门](http://cloud.spring.io/spring-cloud-static/Finchley.M2/#_appendix_compendium_of_configuration_properties)
+  + `eureka`一些可能需要的配置介绍：[所有配置说明传送门](http://cloud.spring.io/spring-cloud-static/Finchley.M2/#_appendix_compendium_of_configuration_properties)
    + `eureka.server.eviction-interval-timer-in-ms` ：服务端自动移除过期的客户端(以毫秒为单位，默认是60秒)，如果在网络不稳定的情况，可以适当提高当前值(以当前时间间隔检查并移除过期的客户端，判断是否过期由`eureka.instance.lease-expiration-duration-in-seconds`确定)
    + `eureka.server.enable-self-preservation` ：是否开启自我保护模式，默认为`true`。默认情况下，如果Eureka Server在一定时间内没有接收到某个微服务实例的心跳，Eureka Server将会注销该实例（默认90秒）。
        但是当网络分区故障发生时，微服务与Eureka Server之间无法正常通信，以上行为可能变得非常危险了——因为微服务本身其实是健康的，此时本不应该注销这个微服务。Eureka通过“自我保护模式”来解决这个问题——
@@ -246,7 +247,7 @@
    + `eureka.client.eureka-connection-idle-timeout-seconds` ：客户端连接最大空闲时间(客户端之间的交互也是`http`长连接，超过设置的空闲时间自动回收,默认30秒)
    + `eureka.server.peer-node-connection-idle-timeout-seconds`：集群间连接(心跳检测或者数据同步的`http`连接)最大空闲时间，默认30s
    + `eureka.server.max-time-for-replication`：集群同步最长间隔时间，默认30s
-
+   
 #### 集群部署方式
    + `eureka`通过`spring.application.name`是否相同来确定多个服务间是否属于集群模式
    + `eureka server`也设计成属于`client`，实现集群时，需要将自己作为客户端向其它服务端注册。在检测是否存在集群时，通过将所有客户端的域名地址
@@ -282,16 +283,109 @@
               serviceUrl:
                 defaultZone: http://eureka.tutorial:8761/eureka/,http://eureka.tutorial.backup:8762/eureka/
 
-#### 集群策略
+#### EUREKA集群策略
   + 客户端交互：客户端仅与其中的一台服务器发送心跳检测，其它的服务器负责更新数据，默认是按照`defaultZone`定义的先后顺序向服务器发送心跳检测
   + 服务稳定性：
     + 服务器与客户端之间，服务器与服务器之间的数据交互和心跳检测，都是`http`长连接，内部有个线程专门负责监控链接情况，所以消耗比较小。
     + 服务器需要控制连接数量，防止出现主从模式(即一台服务器负责所有的客户端连接，另外的服务器仅仅是作为备用服务器)，所以在配置时，多个服务器地址最好是分区的(`zone node`)，
       按最短，最近路由原则。如果在同一个分区，那么客户端也需要负载轮训服务端
-  + 服务性能：不论客户端与服务端交互，还是服务端与服务端交互，还是客户端与客户端等交互，都是使用`http`长连接模式，所以性能比普通的`http`短连接高很多，可以通过设置`eureka.client.eureka-connection-idle-timeout-seconds`/`eureka.server.peer-node-connection-idle-timeout-seconds`控制连接生存周期    
+  + 服务性能：不论客户端与服务端交互，还是服务端与服务端交互，还是客户端与客户端等交互，都是使用`http`长连接模式，所以性能比普通的`http`短连接高很多，
+可以通过设置`eureka.client.eureka-connection-idle-timeout-seconds`/`eureka.server.peer-node-connection-idle-timeout-seconds`控制连接生存周期         
   + 备份数据策略：集群间会定时的获取对等方数据，然后更新数据
   + 节点宕机策略：如果服务器发生异常(网络异常或者服务器故障)，那么客户端会自动选择其它的服务器再次发送心跳检测，如果检测成功，那么客户端后续将与另外的服务器发生心跳检测
- 
+  + 如果是配置了`hystrix`和`ribbon`，那么一定要注意`hystrix`的超时时间大于`ribbon`最大重试次数的超时时间，防止提前进入超时
+  
+#### Hystrix
+  + 声明：文档中的描述是以`spring cloud`集成`hystrix`而叙述，有些功能是`hystrix`本身有的，但是由于`spring cloud`集成原因而导致局限
+  + 如何使用或者避免`fallback`
+    + 如果系统抛出非预期的异常，那么就会`fallback`，[(点击查看`Hystrix`定义的异常列表)](https://github.com/Netflix/Hystrix/wiki/How-To-Use#execution-exception-types)
+    + 除了`HystrixBadRequestException`异常，所有的其它异常都会被`metrics`监控，然后触发`fallback`策略。所以，一般的参数错误等需要将错误包装成
+     `HystrixBadRequestException`，或者自定义`no fallback exception`，然后再通过`getCause`获取信息，这样就不会被统计到`metrics`错误信息中，也就不会触发`fallback`
+    + 因为`hystrix`将超时作为失败处理，所以导致`fallback`，所以在设计的时候一定要控制好超时时间
+    + 一般的`RPC`在业务调用的异常或者超时时，会自动选择重试，而`hystrix`则直接作为`fallback`处理，所以在负载这块，也是需要重点考虑，防止频繁的`fallback`，而返回非预期数据。
+      或者在返回`fallback`时，带上错误码，然后通过框架层再次选择重试其它机器。否则需要考虑将超时作为一个正向流程，让框架自动选择重试，这样就需要改造下`hystrix`。当然负载的时候
+      设置的`负载超时时间*重试次数<服务端超时时间`，客户端会继续选择重试其它服务端，但是这样就需要高效的实现幂等功能
+    + `Hystrix fallback`策略：先获取缓存，如果缓存没有再提供默认(请注意：我指的是`fallback`策略，正常情况下，
+      需要远程调用数据则远程调用，除非缓存数据对业务影响不大，而且在一定的时效能更新缓存，也可以先从缓存获取数据)
+    + 客户端配合`feign`时，局限非常严重，仅仅支持`fallback`，我们应该将控制放到服务端
+    + 业务方仅需在`fallback`方法中，添加一个`Throwable`参数，就可以获取错误信息
+  + 如果是配置了`hystrix`和`ribbon`，那么一定要注意`hystrix`的超时时间大于`ribbon`最大重试次数的超时时间，防止提前进入超时
+  + [服务端属性配置传送门](https://github.com/Netflix/Hystrix/wiki/Configuration)(注意：`spring`与`hystrix`的属性`key`可能不一样，
+     `spring key`可以通过`HystrixPropertiesManager`类查看，`netflix key` 通过`HystrixCommandProperties`查看，这里我以`spring key`的形式进行说明)
+    + `fallback.enabled`：是否开启`fallback`，默认`true` 
+    + `execution`配置参数 
+      + `execution.isolation.strategy`：执行策略，默认是`THREAD` 
+      + `execution.isolation.thread.timeoutInMilliseconds`：设置线程执行超时时间，默认`1`秒
+      + `execution.timeout.enabled`：是否开启超时，默认`true`  
+      + `execution.isolation.thread.interruptOnTimeout`：到了超时时间后，是否调用`interrupt`方法，默认`true`
+      + `execution.isolation.semaphore.maxConcurrentRequests`：在开启`semaphore`模式下最大并发调用，默认10
+    + `semaphore`模式：由于`semaphore`模式用的比较少，而且目前发现流控方面有一点问题，暂时不深入研究
+    + 熔断器配置参数：因为`spring cloud`配合`feign`在客户端方面的支持局限太过严重(仅仅支持`fallback`)，导致熔断功能大打折扣，几乎无用武之地(`todo`下列参数还未测试)
+      + `circuitBreaker.enabled`：是否开启熔断器功能，默认`true`
+      + `circuitBreaker.requestVolumeThreshold`：在某个时间段(`metrics.rollingStats.timeInMilliseconds`)失败量达到这个值后开启熔断器，默认`20`个
+      + `circuitBreaker.sleepWindowInMilliseconds`：熔断器开启多少时间后，再次接收请求，默认`5`s
+      + `circuitBreaker.errorThresholdPercentage`：错误率在某个时间段(`metrics.rollingStats.timeInMilliseconds`)达到多少百分比后，开启熔断器，默认`50`
+      + `circuitBreaker.forceOpen`：是否强制开启熔断器，拒绝所有请求，默认`false`
+      + `circuitBreaker.forceClosed`：是否强制关闭熔断器，不管是否失败，接收所有请求，默认`false`
+    + 数据采集配置参数：  (`todo`下列参数还未测试)
+      + `metrics.rollingStats.timeInMilliseconds`：熔断器监控时间段，在这个时间段内出现了熔断阙值，则开启熔断，默认`10s`
+      + `metrics.rollingStats.numBuckets`：熔断器监控时间段桶的数量，也就是说，某个时间段被分为多少个桶，每个桶占用多少数据量。比如10s，10个桶，则每个桶占用1s的数据，默认`10s`
+      + `metrics.rollingPercentile.enabled`：开启执行时间延迟，以及统计功能，按照百分比的方式展示出来，默认`true`
+      + `metrics.rollingPercentile.timeInMilliseconds`：类似`metrics.rollingStats.timeInMilliseconds`，按照这个时间段统计一次数据，默认`60s`
+      + `metrics.rollingPercentile.numBuckets`：类似`metrics.rollingStats.numBuckets`，默认6
+      + `metrics.rollingPercentile.bucketSize`：设置最多有多少桶，如果超出这个值，则开始进行回滚，覆盖最旧的数据，默认`100`
+      + `metrics.healthSnapshot.intervalInMilliseconds`：间隔多少时间计算一次是否开启熔断等功能，如果数据量太大，频率太高会消耗太多cup，默认`50ms`
+    + `thread configuration`：线城池配置参数
+      + 如果有多个功能使用了同一个线程池，那么哪个线程池先初始化成功，则以哪个线程池为标准。如：`hello`业务仅仅配置了一个`threadPoolKey`= `failfast`，
+        并且希望使用`failfast`线程池配置的参数，而`failfast`的线程参数信息配置在`world`业务中，如设置了`coreSize=4`等一系列参数。如果客户端先调用`hello`，
+        那么将忽略`failfast`线程的参数信息，直接以默认的参数进行线程初始化，仅仅设置线程名为`failfast`。当客户端调用`world`业务时，发现已经存在`failfast`线程池，
+        则直接使用当前线程池，将忽略自己创建的线程参数(为了防止此类问题，最好将线程池配置在配置文件中)
+      + 线程池名称生产规则
+        1. 如果有设置`threadPoolKey`，则线程组名称为`threadPoolKey`
+        2. 如果线程有设置`groupKey`，则线程组名称为`groupKey`
+        3. 以上都未设置则线程池名称为：`hystrix-className-number`
+      + `coreSize`：核心线程数，默认`10`个
+      + `maximumSize`：最大线程数，默认`10`，与核心线程数保持一致，保证是固定线程池(注意，此参数默认是不生效的，需要开启`allowMaximumSizeToDivergeFromCoreSize`) 
+      + `maxQueueSize`：默认`-1`，表示阻塞队列为`SynchronizedQueue`，即队列为空，所有请求都转交给线程处理
+      + `queueSizeRejectionThreshold`：因为`maxQueueSize`不可以动态调整，所以增加了这个参数，如果`maxQueueSize`未达到阙值，而这个参数达到了阙值，也会开始拒绝请求。
+         也就是说，`maxQueueSize`和`queueSizeRejectionThreshold`，那个值小就会以哪个值为标准，如果`maxQueueSize=-1`，那么这个参数也无效，默认`5`
+      + `keepAliveTimeMinutes`：线程空闲多少时间后进行回收(注意！需要开启`allowMaximumSizeToDivergeFromCoreSize`才生效)
+          如果`coreSize<maximumSize`，则超过这个时间则回收线程`>coreSize`的空闲线程，默认`1`分钟
+      + `allowMaximumSizeToDivergeFromCoreSize`：是否允许设置`maximumSize`大小，默认`false`
+
+#### hystrix dashboard
+  + [demo传送门](http://blog.csdn.net/u012702547/article/details/78224483)
+  + 应用层添加`@EnableHystrixDashboard``@EnableTurbine`即开启监控功能
+  + 按照如下配置即可
+    
+        turbine:
+          aggregator:
+            cluster-config: SPRING-CLOUD-TUTORIAL, SPRING-CLOUD-TUTORIAL-PROVIDER // 需要监控的应用名称，必须大写，多个则以逗号隔开
+          appConfig: SPRING-CLOUD-TUTORIAL,SPRING-CLOUD-TUTORIAL-PROVIDER // 名称必须与上面的一致
+          instanceUrlSuffix: actuator/hystrix.stream // 默认使用hystrix.stream访问被监控的应用，但是2.x版本的路径改了，所以这里需要修改
+      
+#### [zipkin：分布式调用链](https://github.com/openzipkin/zipkin)
+#### 利用zipkin需要实现的功能
+  + 调用链日志与业务日志结合，先全部加入到日志文件中，然后再由分析日志工具将调用链日志重新清洗
+  + 高可用，界面渲染非常耗性能
+  + 默认采集了http请求的所有日志，还需要采集MQ，数据库等日志
+  + 将业务日志与调用链日志结合
+  + `MDC.ID`以及与业务绑定，但是在将分布式调用数据发送给服务端时，未打印数据内容，只要将这部分数据打印数据打印出来再配合`log`日志输出即可
+  + 调用链日志将会产生两份，一份在日志文件中，一份被写入`zipkin`中，后期将把写入`zipkin`中的日志从日志文件中解析获取
+#### zipkin统计界面一些有疑问的现象
+  + 按照约定，每一个请求都算是一个`span`，所以客户端(本客户端发送和接收)和服务端(服务端接收然后再响应)都会有一个`span`，所以就出现了一个`RPC`调用两个`span`
+  + 在通过浏览器查看真实的`json`数据时，有个非常有趣的现象，客户端的接收时间居然小于服务端发送时间，常理应该是服务端先发送，然后再客户端接收，为什么时间还相反？
+     这里是因为发送统计数据时时产生的误差，在服务端接收请求后，会将数据发送给客户端，然后再异步发送数据到`zipkin`，而且获取的时间是当前时间，所以产生了时间差
+  + 由于一个`RPC`调用，会产生两个`span`，所以在界面上也会显示两个`span`，而且按照层级嵌套的方式显示。两个`span`生成流程是：
+     `master client -> slave client -> slave response -> master response`，`master span`表示这个span需要与服务端一起共用，服务端也需要这个`span`，
+      最终产生一个客户端和服务端一起的`span`，可以根据这个`span`计算出客户端耗时，服务端耗时，网络耗时。
+      `slave span`仅仅被客户端使用，表示客户端从发送请求到接收总共耗时，根据`slave span`和`master span`可以计算出中间耗时，比如中间还有其它拦截器调用
+  + 如果是调用超时，超时拦截器会提前返回数据并生成一个`span`，如果是使用了`ribbon`负载，那么有可能再次请求服务端，所以会再次产生一个`span`，
+     所以在调用链界面会看到两个或者多个`span`，而由于服务端最后返回了数据，所以客户端最终的接收时间和服务端发送时间以最后的请求为准
+  + 客户端和服务端发送的数据中，都是按照各自的系统时间计算，所以可能会产生一点小小的误差
+#### 配置参数
+  + `spring.sleuth.sampler.probability=1`，默认仅采集`10%`的数据，我们需要全量采集
+
 #### swagger引入理由
   + 由于接口众多，并且细节复杂（需要考虑不同的HTTP请求类型、HTTP头部信息、HTTP请求内容等），高质量地创建这份文档本身就是件非常吃力的事，下游的抱怨声不绝于耳
   + 随着时间推移，不断修改接口实现的时候都必须同步修改接口文档，而文档与代码又处于两个不同的媒介，除非有严格的管理机制，不然很容易导致不一致现象
@@ -303,7 +397,7 @@
   + 因为是`rest api`，所以生成的文档都必须标注为`RestController`
   + 每个`controller`、`method`、`parameter`、`RequestBody`、`ResponseBody`、`Model`、`Model.Field`都必须写上注释
   + 默认是所有的`controller`、`method`都提供文档，如果某个`controller`或者某个`method`不需要提供出来，那么请添加隐藏注解
-  + 如果是配置了`hystrix`和`ribbon`，那么一定要注意`hystrix`的超时时间大于`ribbon`最大重试次数的超时时间，防止提前进入超时
+
 #### demo
   + `controller`定义
   + ![](http://note.youdao.com/yws/api/personal/file/F210B1A196E34EDC868D7FC129D52CDC?method=download&shareKey=37bdcaa87b73934ed7c67c090358aedd)
@@ -312,3 +406,4 @@
   + 实际效果图
   + ![](http://note.youdao.com/yws/api/personal/file/0604C664DBA14ADEB9A2EA6DB35FD7BA?method=download&shareKey=4f3abea5afa2e2eb593a1268b1241a98)
   + [登录地址](http://localhost:8080/swagger-ui.html)
+
