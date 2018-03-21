@@ -11,6 +11,10 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 
 /**
+ * @description 从配置中心获取数据，然后追加到propertySources中。
+ *              但是这个局限性有局限性，比如有些条件是判断某个属性是否存在，而且初始化bean比当前bean还早，则无法获取属性，导致判断失败。
+ *              正确的应该是在spring初始化时候，就将属性追加到环境变量中，通过org.springframework.context.ApplicationContextInitializer实现，
+ *              这样就保证了所有的属性都在使用之前注入到环境变量中去了
  * @author chen
  * @date 2017/8/15 17:14
  */
