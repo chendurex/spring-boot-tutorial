@@ -253,7 +253,7 @@
    + `eureka`通过`spring.application.name`是否相同来确定多个服务间是否属于集群模式
    + `eureka`通过`eureka.instance.hostname`与`serviceUrl`中的`host`是否相同来确定是自身服务还是远程服务。
       如果`eureka.instance.hostname`与配置的`serviceUrl`相同，则认为是自身服务，则自动移除当前`URL`。所以在配置集群时候，可以把所有的
-      服务地址都配置一起加上去，让`eureka`去做过滤(服务器地址如果是以`IP`形式配置的话，那么本机是无法实现集群的，实现代码在`PeerEurekaNodes.resolvePeerUrls`)
+      服务地址都配置一起加上去，让`eureka`去做过滤
      + 如果是以`IP`方式实现集群，那么需要开启`prefer-ip-address`，`eureka`获取`hostname`的时候，会自动转化为`IP`,并且`serviceUrl`也需要以`IP`的方式配置
      + 如果`eureka`以域名的方式进行注册，需要在`/etc/hosts`上配置相关的域名
    + 如果发布成功，则可以通过控制台查看`available-replicas`是否有期望的服务地址
