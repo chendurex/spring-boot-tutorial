@@ -218,8 +218,8 @@
        RENEWALS ARE LESSER THAN THRESHOLD AND HENCE THE INSTANCES ARE NOT BEING EXPIRED JUST TO BE SAFE`)，但是如果真的是突然大量的服务宕机，那么就会出现服务调用大量失败，情况严重可能会导致雪崩效应
     + `spring.application.name` ： 客户端或者服务端显示的唯一名称，用于区别各个业务
     + `eureka.client.serviceUrl.defaultZone` ： 客户端向服务端发送注册请求地址，注意端口号要跟tomcat端口号一致
-    + `eureka.client.register-with-eureka` ： 表示是否将自己注册到`Eureka Server`，默认为`true`(如果是服务器，则改为`false`)
-    + `eureka.client.fetch-registry` ：  表示是否从`Eureka Server`获取注册信息，默认为`true`(如果是服务器，则改为`false`)
+    + `eureka.client.register-with-eureka` ： 表示是否将自己注册到`Eureka Server`，默认为`true`(如果`Eureka Server`是非集群环境，则改为`false`)
+    + `eureka.client.fetch-registry` ：  表示是否从`Eureka Server`获取注册信息，默认为`true`(如果`Eureka Server`是非集群环境，则改为`false`)
     + `eureka.instance.lease-expiration-duration-in-seconds` ：表示eureka server至上一次收到client的心跳之后，等待下一次心跳的超时时间，在这个时间内若没收到下一次心跳，则将移除该客户端(默认90秒)，如果该值太大，则很可能将流量转发过去的时候，该instance已经不存活了；如果该值设置太小了，则instance则很可能因为临时的网络抖动而被摘除掉；该值至少应该大于`lease-renewal-interval-in-seconds`
    + `eureka.instance.lease-renewal-interval-in-seconds` ：客户端发送心跳给服务端的频率。如果在`lease-expiration-duration-in-seconds`后，服务端没有收到客户端的心跳，
         则将移除当前客户端。另外，如果当前客户端实现了`HealthCheckCallback`，并决定让自己`unavailable`的话，则该客户端也不会接收到流量(默认30秒)
