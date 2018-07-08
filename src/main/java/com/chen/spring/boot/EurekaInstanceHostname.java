@@ -34,7 +34,7 @@ public class EurekaInstanceHostname implements ServletContextInitializer {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private static final String DEFAULT_EUREKA_CLIENT_SERVICE_URL_ZONE = "eureka.client.serviceUrl.defaultZone";
     private static final String DEFAULT_INSTANCE_NAME = "custom.instance.hostname";
-    private volatile boolean suc = false;
+    private volatile boolean suc;
     public EurekaInstanceHostname(ConfigurableEnvironment env) {
         log.info("开始将eureka的instance.hostname注入到property中");
         init(env);
@@ -43,7 +43,7 @@ public class EurekaInstanceHostname implements ServletContextInitializer {
                env.getProperty(DEFAULT_INSTANCE_NAME));
     }
     @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
+    public void onStartup(ServletContext servletContext) {
         if (!suc) {
             throw new IllegalStateException("未将eureka.instance.hostname注入到properties中");
         }

@@ -2,6 +2,8 @@
   + 说明：这是一个`springboot`框架，完全采用`springboot`进行开发的框架(version:`2.0.0.RELEASE`)
   + Spring Boot提供了一个快速（和自治的）的方式来创建一个基于Spring的生产环境。它是基于Spring框架，支持约定优于配置，并且被设计成尽可能快地让你启动和运行程序。[传送门](https://docs.spring.io/spring-boot/docs/2.0.0.RELEASE/reference/htmlsingle/)
   
+  + 这个项目仅仅是个人在工作中使用到或者业余项目使用到的，然后拼拼凑凑加上去的，为了以后遇见同等问题有记录，完全是为了个人所用
+  
 #### 目前遇见的问题以及引入`springboot`理由
   + 第一次部署项目的时候，需要将项目与`tomcat`集成，或者在修改配置、增加依赖的时候，也有可能需要再次配置`tomcat`，这是一个重复而且繁琐的过程，希望能避免
   
