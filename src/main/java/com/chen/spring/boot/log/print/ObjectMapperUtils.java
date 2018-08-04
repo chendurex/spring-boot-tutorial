@@ -15,14 +15,17 @@ import java.lang.ref.SoftReference;
  *                会自动清理对象
  *
  *                为了给使用者一个最简单的操作，而且防止出现不可控的情况，禁止了 set、remove操作，使用者只管理如何获取即可
+ *
+ * ObjectMapper在序列化时候会创建一个JsonGenerator对象，所以是线程安全的，所以直接把它当常量对象使用就好了，下面这个实现完全是属于装逼
  * @date 2017/3/17 14:06
+ * updated 2018/8/04
  */
 public class ObjectMapperUtils {
 
-    private static final ObjectMapperThreadLocal omt = new ObjectMapperThreadLocal();
+    private static final ObjectMapperThreadLocal OMT = new ObjectMapperThreadLocal();
 
     public static ObjectMapper get() {
-        return omt.get().get();
+        return OMT.get().get();
     }
 
     private static class ObjectMapperThreadLocal extends ThreadLocal<SoftReference<ObjectMapper>> {

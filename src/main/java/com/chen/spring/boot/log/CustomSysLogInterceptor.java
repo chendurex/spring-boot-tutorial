@@ -29,7 +29,7 @@ public class CustomSysLogInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response, Object handler) throws Exception {
+                             HttpServletResponse response, Object handler) {
         startTimeThreadLocal.set(System.currentTimeMillis());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Request Start And RequestPath Is: {}", getRealPath(request));

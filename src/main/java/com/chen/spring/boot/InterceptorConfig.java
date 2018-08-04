@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
@@ -18,11 +19,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 @ConditionalOnWebApplication
-public class InterceptorConfig extends WebMvcConfigurerAdapter {
+public class InterceptorConfig implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnClass(name = Constants.CUSTOM_SYS_LOG_INTERCEPTOR)
-    @Autowired
     public HandlerInterceptor customSysLogInterceptor() {
         return (HandlerInterceptor) Util.createInstance(Constants.CUSTOM_SYS_LOG_INTERCEPTOR);
     }

@@ -1,2 +1,0 @@
-ProviderRpcLogFilter=com.chen.spring.boot.log.CustomProviderRpcLogFilter
-ConsumerRpcLogFilter=com.chen.spring.boot.log.CustomConsumerRpcLogFilter
