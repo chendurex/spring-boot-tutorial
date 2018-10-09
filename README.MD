@@ -226,8 +226,26 @@
    + `eureka.instance.lease-renewal-interval-in-seconds` ：客户端发送心跳给服务端的频率。如果在`lease-expiration-duration-in-seconds`后，服务端没有收到客户端的心跳，
         则将移除当前客户端。另外，如果当前客户端实现了`HealthCheckCallback`，并决定让自己`unavailable`的话，则该客户端也不会接收到流量(默认30秒)
      + `eureka.instance.lease-renewal-interval-in-seconds`与`eureka.instance.lease-expiration-duration-in-seconds`是配置在客户端，而不是服务端，也就是说服务端针对每个不同的客户端实现不同的移除策略
-   + 服务端移除过期客户端规则：客户端会定期向服务端发送心跳，设置参数为`eureka.instance.lease-renewal-interval-in-seconds`，发送成功后，服务端会更新过期时间，`lastUpdateTimestamp`=`CurrentTime`+`eureka.instance.lease-expiration-duration-in-seconds`。服务端也会定期的清理过期的客户端，时间间隔参数设置为：`eureka.server.eviction-interval-timer-in-ms`，清理的规则为：`CurrentTime>lastUpdateTimestamp+eureka.instance.lease-expiration-duration-in-seconds`，所以服务端真正移除客户端的时间公式为：remove-time<=eureka.server.eviction-interval-timer-in-ms+eureka.instance.lease-expiration-duration-in-seconds*2)，源码如下：
+   + 服务端移除过期客户端规则：客户端会定期向服务端发送心跳，设置参数为`eureka.instance.lease-renewal-interval-in-seconds`，
+   发送成功后，服务端会更新过期时间，`lastUpdateTimestamp`=`System.currentTimeMillis()`+`eureka.instance.lease-expiration-duration-in-seconds`
+   服务端也会定期的清理过期的客户端，时间间隔参数设置为：`eureka.server.eviction-interval-timer-in-ms`，
+   清理的规则为：`System.currentTimeMillis()>lastUpdateTimestamp+eureka.instance.lease-expiration-duration-in-seconds`，
+   所以服务端正常情况下移除客户端的时间公式为：`remove-time<=eureka.server.eviction-interval-timer-in-ms+eureka.instance.lease-expiration-duration-in-seconds*2)`，
+   但是，`eureka client`第一次注册的时候，`lastUpdateTimestamp`并未增加`duration`时长，导致了注册跟续约两次的时间并不相同，
+   如果`eureka.instance.lease-renewal-interval-in-seconds`>`eureka.instance.lease-expiration-duration-in-seconds`时，
+   而且客户端在`eureka.server.eviction-interval-timer-in-ms`时间内未执行续约操作的话，那么服务器就会移除当前客户端，导致客户端一直
+   重新注册，产生了服务端移除客户端，客户端重新注册这种循环效应(这个`bug`，`eureka`并不打算解决，这个可以在`com.netflix.eureka.lease.Lease#isExpired(long)`注释中找到)。
+     
+   源码如下：
        
+       
+       public Lease(T r, int durationInSecs) {
+               holder = r;
+               registrationTimestamp = System.currentTimeMillis();
+               lastUpdateTimestamp = registrationTimestamp;
+               duration = (durationInSecs * 1000);
+       
+           }
             public void renew() {
             lastUpdateTimestamp = System.currentTimeMillis() + duration;
     
