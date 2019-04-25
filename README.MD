@@ -78,6 +78,47 @@
     
 #### [如何开发一个基于boot的组件](http://docs.spring.io/spring-boot/docs/1.5.6.RELEASE/reference/htmlsingle/#boot-features-custom-starter)
 
+#### 基本功能
+ + 创建启动类，并且增加`@SpringBootStarterAnnotation`注解，可以参照`com.chen.spring.boot.tutorial.Application`实现
+  + 在开发和测试环境，如果觉得随机端口比较麻烦，可以在配置中心增加server.port=xxxx固定端口号
+ + 日志配置规则
+  + 默认情况下，`windows`系统(即本地开发环境)只会在控制台打印日志，不会打印日志到日志文件，如果需要将日志文件打印到日志
+  文件，请在配置中心增加如下配置：`logging.custom.std.file.enabled=true`
+  + 默认情况下，除`windows`系统(即开发、测试、预发、线上)只会在日志文件打印日志，不会将日志打印到控制台，如果需要将
+  日志文件打印到控制台，请在配置中心增加如下配置：`logging.custom.std.console.enabled=true`  
+  + 动态修改某个日志级别，如修改`com.chen.spring.boot.tutorial.service`项目包路径下日志级别为`debug`，则去配置中心中，在自己的项目增加配置为：
+    `logging.level.com.chen.spring.boot.tutorial.service=debug`，注意前面带了`logging.level`前缀
+  + 如果某个日志级别监控完毕，需要改回原来的默认日志级别，则删除当前配置即可
+  + 线上默认开启了监控所有的入参操作，如果需要关闭，请在配置中心修改日志等级即可：
+    + `logging.level.com.chen.spring.boot.sc.advice.CustomizePathLogInterceptor=warn`
+    + `logging.level.com.chen.spring.boot.sc.advice.CustomizeReqInterceptor=warn`
+  + 线上也提供了监控参数返回值的功能，默认是关闭的，如果需要开启，可以在配置中心修改日志等级：
+    + `logging.level.com.chen.spring.boot.sc.advice.CustomizeResInterceptor=debug` 
+  + 默认只开启了`com.chen.spring.boot`路径日志，级别为`info`，这个最基本的日志是不能修改或者删除，如果需要覆盖日志，那么需要在配置
+    中心增加其它的策略，如需要将本项目的所有日志改为`debug`，则可以在配置中心增加`logging.level.com.chen.spring.boot.tutorial=debug`
+    配置，或者仅仅针对某个包下面修改配置，如`logging.level.com.chen.spring.boot.tutorial.service=debug`。如果不需要当前日志策略，
+    则删除配置即可。
+  + 注意！如果开启了整个项目的日志级别为`debug`，那么会导致项目的日志量非常多，特别是`mybatis`的`sql`语句也会打印，如果仅仅是
+    单独针对某个`mybatis`打印`sql`语句，那么配置`logging.level.xxx.mapper.xxxMapper=debug`即可，千万不可随意开启整个项目的
+    日志配置为`debug`，用完后，一定要记得删除配置
+    
+ + 增加了`com.chen.spring.boot.sc.SpringContextHolder`工具类去获取`bean`
+ + 增加了事务拦截配置切面，默认拦截`com.chen.spring.boot..*.service.impl`切面( 也可以通过在配置中心修改默认配置，
+   如`spring.transaction.pointcut.expression=execution(* com.chen.spring.boot..*.service.impl.*.*(..))` )，
+   + 如果方法有配置事务注解，则以注解为标准，否则以很切面的事务为标准
+   + 针对`select、query、find、get、list`等默认是不开启事务，`readonly`
+   + 针对事务配置，大家可以直接查看源码`com.chen.spring.boot.sc.spring.TransactionConfiguration`
+   + 如果需要动态增加一个事务拦截切面，那么可以在配置中心增加配置，规则为：`spring.transaction.interceptor.include.xxx=config`
+     + `spring.transaction.interceptor.include.fire=fire*|PROPAGATION_NOT_SUPPORTED, readOnly` # 表示增加一个名称为fire配置，
+     拦截以fire开头的方法名，事务属性为只读事务
+   + 如果需要删除默认的事务拦截切面，那么可以在配置中心增加配置，规则为：`spring.transaction.interceptor.include.xxx=true`
+     + `spring.transaction.interceptor.exclude.select=true` #表示删除名称为`select`的事务切面
+   + 默认不开启事务，也就是默认大家都是裸奔，如果需要开启事务请在`apollo`配置`spring.transaction.enabled=true`
+   + 注意：此事务拦截功能只是在原来`spring`提供的事务拦截功能的基础上增加了一个事务横切面而已，方便大家不用每次为了开启事务
+   都需要在方法上面增加`Transactional`注解，它并未影响到我们通过`Transactional`注解显示的开启某个方法注解。如果同时开启事务功能，
+   并且在方法上面也存在`Transactional`注解，那么会以`Transactional`注解为首选，没有`Transactional`注解时，此功能才成为备选方案
+   注解开启事务功能
+ + 提供编译时检查代码功能        
 #### 如何扩展配置
   + 实现方式都是通过添加`Configuration`注解以代表一个配置，但是启动时有两种方式
     + 第一种：`Configuration`是基于`Component`注解，所以只要配置的扫描路径能扫描到，即可实现注入配置
@@ -167,7 +208,126 @@
          spring.chen.context-param.customConfigKey1=customConfigValue1
          spring.chen.context-param.customConfigKey2=customConfigValue2
 
-
+#### 多数据源使用
+  + 单数据源使用时直接在配置文件中增加账号密码即可开箱即用
+    + spring.druid.username = username
+    + spring.druid.password = password
+    + spring.druid.url = jdbc:mysql://url:port/database?characterEncoding=utf8
+  + 多数据源使用方式(超过2个以上数据源的使用方式)
+    + 提供两种数据源操作方式
+      + 手动切换数据源，使用完毕后需要手动切换默认数据源(可以针对多次db操作)
+      + 自动切换数据源，使用完毕后自动切换到默认数据源(仅针对一次db操作)
+    + `spring.druid.checkMultiName = true` # 开启检查数据源功能，如果数据源切换有误则抛出异常
+    + 首先在配置中开启多数据源：`spring.druid.multi-datasource.enabled=true`
+    + 然后再配置多数据源账号密码，比如我可能需要连接`abc`的数据库， 那么我将`{name}`占位符改为`abc`，
+    即`spring.druid.multi.abc.username=dbname`；如果我还要继续连接`edf`数据库，那么我再配置一份
+    `spring.druid.multi.def.username=dbname`即可，依次类推，业务方在获取其它数据源的时候，
+    通过`MultipleDataSource.route({name})` 即可获取到需要的数据源
+    + spring.druid.multi.{name}.username=dbname
+    + spring.druid.multi.{name}.password=dbpwd
+    + spring.druid.multi.{name}.url=jdbc:mysql://host:port/db?characterEncoding=utf8
+    + 示例
+    
+                @Test
+                public void testMulti2() {
+                    // 切换到第一个数据源
+                    MultipleDataSource.routeAtMulti("spring");
+                    Assert.assertNull(userMapper.select(id));
+                    userMapper.insert(user);
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    // 切换到第二个数据源
+                    MultipleDataSource.routeAtMulti("cloud");
+                    Assert.assertNull(userMapper.select(id));
+                    userMapper.insert(user);
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    userMapper.delete(id);
+                    Assert.assertNull(userMapper.select(id));
+            
+                    MultipleDataSource.routeAtMulti("spring");
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    userMapper.delete(id);
+                    Assert.assertNull(userMapper.select(id));
+            
+                    // 回到默认数据源
+                    MultipleDataSource.reset();
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    userMapper.delete(id);
+                    Assert.assertNull(userMapper.select(id));
+                }
+    
+               @Test
+               public void testMultiAtOnce() {
+                   int count = userMapper.insert(user);
+                   Assert.assertTrue(count > 0);
+                   int id = user.getId();
+                   Assert.assertEquals(v, userMapper.select(id).getName());
+           
+                   // 切换数据源
+                   MultipleDataSource.routeAtOnce("spring");
+                   Assert.assertNull(userMapper.select(id));
+                   // 回到默认数据库中，所以可以查到数据
+                   Assert.assertEquals(v, userMapper.select(id).getName());
+                   MultipleDataSource.routeAtOnce("spring");
+                   userMapper.insert(user);
+                   // 删除默认数据库中数据
+                   userMapper.delete(id);
+                   Assert.assertNull(userMapper.select(id));
+                   MultipleDataSource.routeAtOnce("spring");
+                   Assert.assertEquals(v, userMapper.select(id).getName());
+                   MultipleDataSource.routeAtOnce("spring");
+                   userMapper.delete(id);
+                   MultipleDataSource.routeAtOnce("spring");
+                   Assert.assertNull(userMapper.select(id));
+               }
+               
+               
+  + 主从使用方式(其实就是简化版的多数据源)  
+    + 跟上面的配置一模一样，只是数据源不能配置超过两个，否则无法识别从库
+    + 示例
+    
+                @Test
+                public void testMasterSlaveAtOnce() {
+                    user.setId(i);
+                    int count = userMapper.insert(user);
+                    Assert.assertTrue(count > 0);
+                    int id = user.getId();
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    // 切换到从数据库,注意，只执行一次DB操作默认会回到主库
+                    MultipleDataSource.slaveAtOnce();
+                    Assert.assertNull(userMapper.select(id));
+                    // 回到默认数据库了，所以能继续查到数据
+                    Assert.assertNotNull(userMapper.select(id));
+                    MultipleDataSource.slaveAtOnce();
+                    userMapper.insert(user);
+                    MultipleDataSource.slaveAtOnce();
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    // 删除主库数据
+                    userMapper.delete(id);
+                    Assert.assertNull(userMapper.select(id));
+                    MultipleDataSource.reset();
+                    Assert.assertNull(userMapper.select(id));
+                    MultipleDataSource.slaveAtOnce();
+                    userMapper.delete(id);
+                    MultipleDataSource.slaveAtOnce();
+                    Assert.assertNull(userMapper.select(id));
+                }
+                
+                @Test
+                public void testMasterSlaveMulti() {
+                    // 切换到从数据库，不会做自动切换，需要人工手动切换
+                    MultipleDataSource.slaveAtMulti();
+                    Assert.assertNull(userMapper.select(id));
+                    userMapper.insert(user);
+                    Assert.assertEquals(v, userMapper.select(id).getName());
+                    userMapper.delete(id);
+                    Assert.assertNull(userMapper.select(id));
+                }
+                
+  + [spring-boot-mybatis](http://www.mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)
+  + [druid](https://github.com/alibaba/druid)
+  + [spring-boot-pagehelp](https://github.com/abel533/MyBatis-Spring-Boot)
+                
+                
 ### spring cloud简介
   + `Spring Cloud`为开发人员提供了快速构建分布式系统中一些常见模式的工具（例如配置管理，服务发现，断路器，智能路由，微代理，控制总线）。
     分布式系统的协调导致了样板模式, 使用`Spring Cloud`开发人员可以快速地支持实现这些模式的服务和应用程序。他们将在任何分布式环境中运行良好，
@@ -215,7 +375,30 @@
   + Swagger2可以轻松的整合到Spring Boot中，并与Spring MVC程序配合组织出强大RESTful API文档。它既可以减少我们创建文档的工作量，同时说明内容又整合入实现代码中，
      让维护文档和修改代码整合为一体，可以让我们在修改代码逻辑的同时方便的修改文档说明。另外Swagger2也提供了强大的页面测试功能来调试每个RESTful API
   + [swagger2传送门](http://springfox.github.io/springfox/docs/current/)
-
+  + 文档要求  
+    + 因为是`rest api`，所以生成的文档都必须标注为`RestController`
+    + 每个`controller`、`method`、`parameter`、`RequestBody`、`ResponseBody`、`Model`、`Model.Field`都必须写上注释
+    + 默认是所有的`controller`、`method`都提供文档，如果某个`controller`或者某个`method`不需要提供出来，那么请添加隐藏注解
+  + 基本的注解说明
+    + @ApiModel("SWAGGER自定义对象"):描述DTO对象，名称必须唯一
+    + @ApiModelProperty(notes = "用户ID", example = "1", required = true):描述DTO对象中的属性域
+    + @Api(description = "SWAGGER 介绍"):描述API接口集
+    + @ApiOperation(value = "SWAGGER介绍", response = UserVO.class):描述API单个接口
+    + 如果需要对某个请求增加头信息，可以直接在controller中增加header即可
+            
+            @ApiOperation(value = "commons", response = ResResult.class)
+            @PostMapping("/commons")
+            public ResResult<SwaggerDTO> timeout(@RequestBody @Validated SwaggerDTO swaggerDTO,@RequestHeader("uid") Integer uid) {
+                return ResUtils.data(swaggerDTO);
+            }
+  
+   + 如果需要针对整个项目所有的接口都增加header，可以通过在配置中心增加配置项，`headerName1,type,defaultValue1|headerName2,type,defaultValue2|etc...`
+     + headerName1代表第一个头部名称
+     + type代表头部类型，有string、int、boolean等基本类型
+     + defaultValue1代表默认值，如果不需要则不填写(包括前面的逗号也移除)
+     + 每个不同的头部信息通过|(竖线)分割，每个头部不同的属性通过,(半角逗号隔开)
+  + 其它的注解请自行查看官网
+     
 #### 文档要求
   + 因为是`rest api`，所以生成的文档都必须标注为`RestController`
   + 每个`controller`、`method`、`parameter`、`RequestBody`、`ResponseBody`、`Model`、`Model.Field`都必须写上注释

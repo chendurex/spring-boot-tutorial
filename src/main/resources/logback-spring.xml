@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <springProperty scope="context" name="JAVA_LOG_APP_NAME" source="spring.application.name" defaultValue="spring-application-start"/>
+    <springProperty scope="context" name="JAVA_LOG_MAX_HISTORY" source="logging.custom.max.history" defaultValue="7"/>
+    <springProperty scope="context" name="JAVA_LOG_MAX_FILE_SIZE" source="logging.custom.max.file.size" defaultValue="200MB"/>
+    <springProperty scope="context" name="JAVA_LOG_TOTAL_SIZE" source="logging.custom.max.total.size" defaultValue="10GB"/>
+    <springProperty scope="context" name="ROOT_LOG_LEVEL" source="logging.custom.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="JAVA_LOG_HOME" source="logging.custom.path" defaultValue="/data/logs/java/logs/"/>
+    <springProperty scope="context" name="FILE_PATTERN" source="logging.custom.file.pattern"
+                    defaultValue="[entry][ts]%d{yyyy-MM-dd$HH:mm:ss.SSS}[/ts][lv]%-2level[/lv][th]%thread[/th][lg]%logger[/lg][cl]%class[/cl][m]%method[/m][ln]%line[/ln][bsid]%X{bsid}[/bsid][esid]%X{esid}[/esid][cmid]%X{cmid}[/cmid][txt]%msg[/txt][ex]%ex{full}[/ex][/entry]%n" />
+
+    <appender name="FILEOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${JAVA_LOG_HOME}/${JAVA_LOG_APP_NAME}-sc-main.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${JAVA_LOG_HOME}/${JAVA_LOG_APP_NAME}-sc-main.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>${JAVA_LOG_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${JAVA_LOG_MAX_FILE_SIZE}</maxFileSize>
+            <totalSizeCap>${JAVA_LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--include from default.xml-->
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <springProperty scope="context" name="LOCAL_ENV" source="server.local.env" defaultValue="false"/>
+    <springProperty scope="context" name="CONSOLE_ENABLED" source="logging.custom.std.console.enabled" defaultValue="false"/>
+    <springProperty scope="context" name="FILE_ENABLED" source="logging.custom.std.file.enabled" defaultValue="false"/>
+    <root level="${ROOT_LOG_LEVEL}">
+        <if condition='property("LOCAL_ENV").equals("false") || property("FILE_ENABLED").equals("true")'>
+            <then>
+                <appender-ref ref="FILEOUT" />
+            </then>
+        </if>
+        <if condition='property("LOCAL_ENV").equals("true") || property("CONSOLE_ENABLED").equals("true")'>
+            <then>
+                <appender-ref ref="STDOUT" />
+            </then>
+        </if>
+    </root>
+</configuration>

@@ -16,6 +16,8 @@ import org.springframework.context.annotation.PropertySource;
  *     这样导致了只要我设置了变量就可以匹配成功，所以默认不能让它匹配到设置的值，这样就变成了匹配除false意外的任何条件了
  *     在没有匹配到任何条件的情况，matchIfMissing就可以作为备选条件来再次检查是否有这个key，如果没有这个key则执行条件
  * @date 2018-04-01 01:50
+ *   如果有配置中心，这个部分就不需要了
+ * @update 2019-03-12
  */
 @Configuration
 public class SpringResourcesInitializer {

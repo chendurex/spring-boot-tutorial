@@ -31,16 +31,15 @@ public class SpringContextHolder implements ApplicationContextAware{
 	  
 	/** 
 	* 从静态变量ApplicationContext中取得Bean, 自动转型为所赋值对象的类型. 
-	*/  
-	@SuppressWarnings("unchecked")  
+	*/
 	public static <T> T getBean(Class<T> clazz) {  
 	checkApplicationContext();  
-	return (T) applicationContext.getBean(clazz);
+	return applicationContext.getBean(clazz);
 	}  
 	  
 	private static void checkApplicationContext() {
 		if (applicationContext == null) {
-			throw new IllegalStateException("applicaitonContext未注入,请在applicationContext.xml中定义SpringContextHolder");
+			throw new IllegalStateException("applicationContext未注入,请在applicationContext.xml中定义SpringContextHolder");
 		}
 	} 
 }

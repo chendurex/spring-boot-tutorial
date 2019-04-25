@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.to8to.component.druid.DruidAutoConfiguration,\
+com.to8to.component.druid.MultiDataSourceAutoConfiguration

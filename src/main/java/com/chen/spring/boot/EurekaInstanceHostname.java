@@ -1,5 +1,6 @@
 package com.chen.spring.boot;
 
+import com.chen.spring.boot.util.IpAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
@@ -67,10 +68,10 @@ public class EurekaInstanceHostname implements ServletContextInitializer {
 
     private String getDefaultInstanceName(ConfigurableEnvironment configurableEnv) {
         String serviceUrl = configurableEnv.getProperty(DEFAULT_EUREKA_CLIENT_SERVICE_URL_ZONE);
-        Collection<String> local = localAddress();
+        Collection<String> local = IpAddressUtils.localAddress();
         log.info("all local address is :{}, register url : {}", local, serviceUrl);
         for (String s : serviceUrl.split(",")) {
-            final String hostname = hostFromUrl(s);
+            final String hostname = IpAddressUtils.hostFromUrl(s);
             final String remoteIp = hostnameToIp(hostname);
             log.info("parser hostname is :{} and translated ip is : {}", hostname, remoteIp);
             if (local.contains(remoteIp)) {
@@ -89,33 +90,4 @@ public class EurekaInstanceHostname implements ServletContextInitializer {
         }
     }
 
-    /**
-     * 获取本机所有的网络IP，包括本地ip127.0.0.1或者局域网ip192.168.3.255
-     */
-    private Collection<String> localAddress() {
-        try {
-            Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
-            Set<String> localAddr = new HashSet<>();
-            while(enumeration.hasMoreElements()) {
-                Enumeration<InetAddress> address = enumeration.nextElement().getInetAddresses();
-                while (address.hasMoreElements()) {
-                    localAddr.add(address.nextElement().getHostAddress());
-                }
-            }
-            return Collections.unmodifiableCollection(localAddr);
-        } catch (Exception e) {
-            log.error("", e);
-            throw new IllegalStateException("获取本地地址失败", e);
-        }
-    }
-
-    private String hostFromUrl(String url) {
-        URI uri;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return uri.getHost();
-    }
 }
