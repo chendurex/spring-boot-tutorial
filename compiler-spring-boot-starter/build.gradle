@@ -1,0 +1,9 @@
+apply plugin: 'java'
+project(':compiler-spring-boot-starter') {
+    dependencies {
+        implementation project(':infra-spring-boot-starter')
+    }
+}
+compileJava {
+    options.compilerArgs.add('-proc:none')
+}
