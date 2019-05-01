@@ -1,0 +1,7 @@
+apply plugin: 'java'
+project(':demo-spring-boot-starter') {
+    dependencies {
+        implementation project(':compiler-spring-boot-starter')
+        implementation project(':infra-spring-boot-starter')
+    }
+}

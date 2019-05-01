@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: spring-redis-test
+  redis:
+    cluster:
+      nodes: 192.168.1.118:7000,192.168.1.118:7001,192.168.1.118:7002
+      max-redirects: 3
+      #password: 123456
+      #redlock: true

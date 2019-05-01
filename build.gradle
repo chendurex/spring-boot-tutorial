@@ -25,6 +25,7 @@ subprojects {
     }
     test.enabled=false
     dependencies {
+        testCompile "org.springframework.boot:spring-boot-starter-test:2.0.0.RELEASE"
         compileOnly 'org.projectlombok:lombok:1.16.8'
         annotationProcessor('org.projectlombok:lombok:1.16.8')
     }

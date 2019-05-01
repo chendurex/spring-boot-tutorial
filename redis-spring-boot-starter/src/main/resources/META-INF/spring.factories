@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.spring.boot.tutorial.redis.RedisPropertiesConfiguration,\
+com.spring.boot.tutorial.redis.RedisConfiguration,\
+com.spring.boot.tutorial.redis.operation.NamespaceOperationConfiguration,\
+com.spring.boot.tutorial.redis.scan.ScanOperationConfiguration

@@ -1,10 +1,9 @@
 package com.spring.boot.tutorial;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
-
 /**
- * @author cheny.huang
- * @date 2018-03-05 16:38.
+ * @author chendurex
+ * @date 2019-05-01 17:00
  */
 @SpringBootStarterAnnotation
 public class Application {
@@ -12,3 +11,4 @@ public class Application {
         new SpringApplicationBuilder(Application.class).run(args);
     }
 }
+

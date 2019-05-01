@@ -1,0 +1,27 @@
+server:
+  port: 8887
+spring:
+  application:
+    name: spring-boot-druid-test
+  druid:
+      username: root
+      password: admin
+      url: jdbc:mysql://192.168.1.59:3306/MybatisTest?characterEncoding=utf8
+      checkMultiName: true
+      multi-datasource:
+        enabled: true
+      multi:
+        spring:
+          username: root
+          password: admin
+          url: jdbc:mysql://192.168.1.59:3306/MybatisTest2?characterEncoding=utf8
+        #cloud:
+        #  username: root
+        #  password: admin
+        #  url: jdbc:mysql://192.168.1.59:3306/MybatisTest3?characterEncoding=utf8
+eureka:
+  client:
+    fetch-registry: false
+    register-with-eureka: false
+
+

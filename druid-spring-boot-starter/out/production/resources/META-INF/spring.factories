@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.spring.boot.tutorial.druid.MultiDataSourceAutoConfiguration,\
+com.spring.boot.tutorial.druid.DruidMonitorAutoConfiguration,\
+com.spring.boot.tutorial.druid.DruidAutoConfiguration

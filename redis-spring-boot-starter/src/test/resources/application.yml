@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: spring-redis-test
+    redis:
+      key:
+        prefix: vvvvvvvvv
+  redis:
+    cluster:
+      nodes: 192.168.1.118:7000
+      max-redirects: 3
+      #password: 123456

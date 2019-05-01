@@ -1,0 +1,7 @@
+apply plugin: 'java'
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-data-redis:2.0.3.RELEASE'
+    compile 'redis.clients:jedis:2.9.0'
+    testCompile 'org.openjdk.jmh:jmh-core:1.21'
+    testCompile 'org.openjdk.jmh:jmh-generator-annprocess:1.21'
+}

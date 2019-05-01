@@ -1,0 +1,9 @@
+apply plugin: 'java'
+project(':redisson-spring-boot-starter') {
+    dependencies {
+        implementation project(':redis-spring-boot-starter')
+    }
+}
+dependencies {
+    compile 'org.redisson:redisson-spring-boot-starter:3.8.0'
+}
