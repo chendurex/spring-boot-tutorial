@@ -1,6 +1,5 @@
 package com.spring.boot.toturial.advice;
 
-import com.chen.spring.boot.advice.interceptor.CustomizePathLogInterceptor;
 import com.spring.boot.toturial.advice.interceptor.CustomizePathLogInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;

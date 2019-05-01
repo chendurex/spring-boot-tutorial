@@ -33,34 +33,6 @@
   + 系统配置：任何的系统配置项(即在`properties`属性项，包括但不限于JDBC、tomcat、context-param等)都在配置中心配置(在配置中心搜索`springboot`查看所有的配置)，请不要直接配置到`application`文件中，
        下面对功能扩展中，使用的是以配置文件的方式进行说明，但是真正使用时，请将配置放置到配置中心
           
-#### 如何部署项目
-  + 项目构建是基于`gradle 4.+`版本，所以构建之前，请确定你的版本是否正确
-  + 请确认项目配置文件`application.properties`位于根目录下
-  + `gradle.build`按如下方式修改(除了修改`pro_name`和`child_version`其它的保持一致)：
-    
-            ext{
-                pro_type    = 'boot'// springboot项目则改为boot
-                child_version = '1.0.0'//项目版本号
-            }
-            apply plugin: 'java'
-            apply plugin: "com.chen.rootconfig"
-
-            buildscript {
-                repositories {
-                    maven { url "http://nexus.chen.com/nexus/content/groups/public/" }
-                }
-                dependencies {
-                    classpath 'com.chen:chen-gradle-plugin:+'
-                    classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE"
-                }
-            
-                configurations.all {
-                    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-                }
-            }
-    
-  + 通过命令行构建项目是`war`包，然后按照`war`项目部署
-
 
 #### 如何使用测试
 
@@ -79,35 +51,35 @@
 #### [如何开发一个基于boot的组件](http://docs.spring.io/spring-boot/docs/1.5.6.RELEASE/reference/htmlsingle/#boot-features-custom-starter)
 
 #### 基本功能
- + 创建启动类，并且增加`@SpringBootStarterAnnotation`注解，可以参照`com.chen.spring.boot.tutorial.Application`实现
+ + 创建启动类，并且增加`@SpringBootStarterAnnotation`注解，可以参照`com.spring.boot.tutorial.Application`实现
   + 在开发和测试环境，如果觉得随机端口比较麻烦，可以在配置中心增加server.port=xxxx固定端口号
  + 日志配置规则
   + 默认情况下，`windows`系统(即本地开发环境)只会在控制台打印日志，不会打印日志到日志文件，如果需要将日志文件打印到日志
   文件，请在配置中心增加如下配置：`logging.custom.std.file.enabled=true`
   + 默认情况下，除`windows`系统(即开发、测试、预发、线上)只会在日志文件打印日志，不会将日志打印到控制台，如果需要将
   日志文件打印到控制台，请在配置中心增加如下配置：`logging.custom.std.console.enabled=true`  
-  + 动态修改某个日志级别，如修改`com.chen.spring.boot.tutorial.service`项目包路径下日志级别为`debug`，则去配置中心中，在自己的项目增加配置为：
-    `logging.level.com.chen.spring.boot.tutorial.service=debug`，注意前面带了`logging.level`前缀
+  + 动态修改某个日志级别，如修改`com.spring.boot.tutorial.service`项目包路径下日志级别为`debug`，则去配置中心中，在自己的项目增加配置为：
+    `logging.level.com.spring.boot.tutorial.service=debug`，注意前面带了`logging.level`前缀
   + 如果某个日志级别监控完毕，需要改回原来的默认日志级别，则删除当前配置即可
   + 线上默认开启了监控所有的入参操作，如果需要关闭，请在配置中心修改日志等级即可：
-    + `logging.level.com.chen.spring.boot.sc.advice.CustomizePathLogInterceptor=warn`
-    + `logging.level.com.chen.spring.boot.sc.advice.CustomizeReqInterceptor=warn`
+    + `logging.level.com.spring.boot.sc.advice.CustomizePathLogInterceptor=warn`
+    + `logging.level.com.spring.boot.sc.advice.CustomizeReqInterceptor=warn`
   + 线上也提供了监控参数返回值的功能，默认是关闭的，如果需要开启，可以在配置中心修改日志等级：
-    + `logging.level.com.chen.spring.boot.sc.advice.CustomizeResInterceptor=debug` 
-  + 默认只开启了`com.chen.spring.boot`路径日志，级别为`info`，这个最基本的日志是不能修改或者删除，如果需要覆盖日志，那么需要在配置
-    中心增加其它的策略，如需要将本项目的所有日志改为`debug`，则可以在配置中心增加`logging.level.com.chen.spring.boot.tutorial=debug`
-    配置，或者仅仅针对某个包下面修改配置，如`logging.level.com.chen.spring.boot.tutorial.service=debug`。如果不需要当前日志策略，
+    + `logging.level.com.spring.boot.sc.advice.CustomizeResInterceptor=debug` 
+  + 默认只开启了`com.spring.boot`路径日志，级别为`info`，这个最基本的日志是不能修改或者删除，如果需要覆盖日志，那么需要在配置
+    中心增加其它的策略，如需要将本项目的所有日志改为`debug`，则可以在配置中心增加`logging.level.com.spring.boot.tutorial=debug`
+    配置，或者仅仅针对某个包下面修改配置，如`logging.level.com.spring.boot.tutorial.service=debug`。如果不需要当前日志策略，
     则删除配置即可。
   + 注意！如果开启了整个项目的日志级别为`debug`，那么会导致项目的日志量非常多，特别是`mybatis`的`sql`语句也会打印，如果仅仅是
     单独针对某个`mybatis`打印`sql`语句，那么配置`logging.level.xxx.mapper.xxxMapper=debug`即可，千万不可随意开启整个项目的
     日志配置为`debug`，用完后，一定要记得删除配置
     
- + 增加了`com.chen.spring.boot.sc.SpringContextHolder`工具类去获取`bean`
- + 增加了事务拦截配置切面，默认拦截`com.chen.spring.boot..*.service.impl`切面( 也可以通过在配置中心修改默认配置，
-   如`spring.transaction.pointcut.expression=execution(* com.chen.spring.boot..*.service.impl.*.*(..))` )，
+ + 增加了`com.spring.boot.sc.SpringContextHolder`工具类去获取`bean`
+ + 增加了事务拦截配置切面，默认拦截`com.spring.boot..*.service.impl`切面( 也可以通过在配置中心修改默认配置，
+   如`spring.transaction.pointcut.expression=execution(* com.spring.boot..*.service.impl.*.*(..))` )，
    + 如果方法有配置事务注解，则以注解为标准，否则以很切面的事务为标准
    + 针对`select、query、find、get、list`等默认是不开启事务，`readonly`
-   + 针对事务配置，大家可以直接查看源码`com.chen.spring.boot.sc.spring.TransactionConfiguration`
+   + 针对事务配置，大家可以直接查看源码`com.spring.boot.sc.spring.TransactionConfiguration`
    + 如果需要动态增加一个事务拦截切面，那么可以在配置中心增加配置，规则为：`spring.transaction.interceptor.include.xxx=config`
      + `spring.transaction.interceptor.include.fire=fire*|PROPAGATION_NOT_SUPPORTED, readOnly` # 表示增加一个名称为fire配置，
      拦截以fire开头的方法名，事务属性为只读事务
@@ -128,61 +100,7 @@
   + 如果需要控制顺序，那么请在`Configuration`配置文件中使用`AutoConfigureOrder`、`AutoConfigureAfter`、`AutoConfigureBefore`等属性
   + 如果将配置放入配置中心，则一定要加上`模块`，不然会导致所有的项目生效，出现大面积系统故障
   + 如果需要控制生成的条件，那么请使用`ConditionalOn*`等注解，[实现机制可以看这里](https://dzone.com/articles/how-springboot-autoconfiguration-magic-works)
-  + 扩展`filter`:
-     + 添加`filter`:
-     
-            @Configuration
-            public class CustomFilter {
-                @Bean
-                @ConditionalOnClass(xxxFilter.class)
-                public FilterRegistrationBean assertionThreadLocalFilter() {
-                    FilterRegistrationBean bean =  new FilterRegistrationBean();
-                    bean.setFilter(new xxxFilter());
-                    bean.setName(assertionThreadLocalFilter.getSimpleName());
-                    bean.addUrlPatterns("/*");
-                    return bean;
-                }
-             }   
-     + 删除`filter`: 在`application.properties`文件中添加要禁用的`filter`过滤器全限定名，多个以逗号分割
-        spring.chen.filter=com.chen.web.module.base.adapter.ExtendInitSessionFilter,org.jasig.cas.client.session.SingleSignOutFilter
-     + `filter`顺序：如果对`filter`有顺序要求，那么请设置`order`属性,值越小优先级越高，如果需要在某个系统自带的`filter`之前或者之后，
-                     自行查看`com.chen.spring.boot.CustomFilter`类中定义的所有`filter`顺序
-  + 扩展`servlet`：
-     + 添加`servlet`:
-         
-             @Configuration
-             public class CustomServlet {
-             
-                 @Bean
-                 public ServletRegistrationBean xxxServlet() {
-                     ServletRegistrationBean bean = new ServletRegistrationBean();
-                     bean.setServlet(new xxxServlet());
-                     bean.setName("xxxServletName");
-                     bean.setLoadOnStartup(2);
-                     bean.setUrlMappings("/*");
-                     return bean;
-                 }
-             }
-     
-     + 删除`servlet`: 在`application.properties`文件中添加要禁用的`servlet`全限定名，多个以逗号分割
-               spring.chen.servlet=com.chen.web.platform.servlet.ApplicationServlet
-                   
-  + 扩展`listener`：
-     + 添加`listener`
 
-
-               @Configuration
-               public class CustomListener {
-
-                   @Bean
-                   public ServletListenerRegistrationBean<IntrospectorCleanupListener> introspectorCleanupListener() {
-                       ServletListenerRegistrationBean<IntrospectorCleanupListener> bean = new ServletListenerRegistrationBean<>();
-                       bean.setListener(new IntrospectorCleanupListener());
-                       return bean;
-                   }
-               }
-       
-       
   + 扩展`interceptor`：按照`Configuration`配置，并且继承`WebMvcConfigurerAdapter`，如果对象需要被`spring`容器监管则定义成`bean`，否则可以不需要
   
 
@@ -202,11 +120,6 @@
               }
 
           }
-      
-  + 扩展系统上下文(`<context-param>`)：在`application.properties`文件中添加如下配置：
-  
-         spring.chen.context-param.customConfigKey1=customConfigValue1
-         spring.chen.context-param.customConfigKey2=customConfigValue2
 
 #### 多数据源使用
   + 单数据源使用时直接在配置文件中增加账号密码即可开箱即用
