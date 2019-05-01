@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
  * @date 2018-09-10 10:52.
  */
 @Slf4j
-@Configuration
 @ConditionalOnBean(LoggingSystem.class)
 public class SpringLogDelegate implements DynamicUpdateSystemLog {
     private final LoggingSystem loggingSystem;

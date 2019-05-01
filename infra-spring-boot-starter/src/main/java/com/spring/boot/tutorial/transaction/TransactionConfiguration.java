@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
  * @author cheny.huang
  * @date 2018-08-20 10:38.
  */
-@Configuration
 @ConditionalOnProperty(value = "spring.transaction.enabled", havingValue = "true")
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @ConditionalOnBean(DataSource.class)

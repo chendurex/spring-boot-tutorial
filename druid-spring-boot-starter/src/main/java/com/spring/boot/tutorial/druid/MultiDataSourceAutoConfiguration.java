@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,7 +19,6 @@ import java.util.Set;
  * @author cheny.huang
  * @date 2018-11-15 10:49.
  */
-@Configuration
 @ConditionalOnClass(value = {DruidDataSource.class, DruidAutoConfiguration.class})
 @EnableConfigurationProperties(value = {MultiDataSourceProperties.class, DruidProperties.class})
 @ConditionalOnProperty(value = "spring.druid.multi-datasource.enabled", havingValue = "true")

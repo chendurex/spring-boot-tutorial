@@ -9,7 +9,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
  * @author chen
  * @date 2017/8/15 17:18
  */
-@Configuration
 public class CustomizeSerializer {
 
     @Bean

@@ -12,7 +12,6 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 
 import java.util.concurrent.Executor;
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit;
  * @date 2019-03-05 18:33:23.
  */
 @ConditionalOnWebApplication
-@Configuration
 public class CustomizeContainer {
     @Bean
     public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> myWebServerFactoryCustomizer(

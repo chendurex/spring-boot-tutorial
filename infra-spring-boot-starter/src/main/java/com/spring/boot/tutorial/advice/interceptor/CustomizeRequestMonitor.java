@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -26,7 +25,6 @@ import java.util.concurrent.TimeUnit;
  * @date 2019-04-16 18:59.
  */
 @Slf4j
-@Component
 class CustomizeRequestMonitor {
     private final int errorDataSize;
     private final int warnDataSize;

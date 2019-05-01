@@ -12,7 +12,6 @@ import org.springframework.core.env.PropertySource;
  * @author cheny.huang
  * @date 2018-08-14 09:28.
  */
-@Configuration
 public class RedisPropertiesConfiguration extends PropertySource implements EnvironmentAware {
     private Environment env;
     @Override

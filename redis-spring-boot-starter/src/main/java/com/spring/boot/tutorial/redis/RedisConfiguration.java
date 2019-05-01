@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
  * @author cheny.huang
  * @date 2018-08-14 09:35.
  */
-@Configuration
 public class RedisConfiguration {
     private static final String PASSWORD = "spring.redis.cluster.password";
     @Bean

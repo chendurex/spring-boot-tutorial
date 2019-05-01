@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
  * @author cheny.huang
  * @date 2018-09-10 11:21.
  */
-@Configuration
 @Import(SpringLogDelegate.class)
 @Slf4j
 public class DynamicLogListener implements InitializingBean {

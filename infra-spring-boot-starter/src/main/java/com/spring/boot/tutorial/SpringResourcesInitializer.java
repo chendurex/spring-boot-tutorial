@@ -19,7 +19,6 @@ import org.springframework.context.annotation.PropertySource;
  *   如果有配置中心，这个部分就不需要了
  * @update 2019-03-12
  */
-@Configuration
 public class SpringResourcesInitializer {
 
     @Configuration
@@ -30,7 +29,7 @@ public class SpringResourcesInitializer {
 
     @Configuration
     @ConditionalOnProperty(prefix = "com.spring.boot.tutorial", name = "pro", havingValue = "false", matchIfMissing = true)
-    @PropertySource(value = "file:/usr/local/src/tools/config.properties", encoding="UTF-8")
+    @PropertySource(value = "file:/usr/local/src/tools/local.properties", encoding="UTF-8")
     class DevConfig {
     }
 }

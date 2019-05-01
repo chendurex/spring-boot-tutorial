@@ -37,13 +37,13 @@ import java.lang.annotation.*;
 //@EnableFeignClients(basePackages = {com.spring.boot.tutorial})// 开启feignClient扫描
 // application默认的项目私有配置、private为线上私有的重要配置，只能由管理员查看、public-default为公共配置
 // 如果业务有需要还需增加其它的私有配置，那么需要业务开发人员自行增加扫描配置
-@EnableApolloConfig({"application","private", "public-default"})
+//@EnableApolloConfig({"application","private", "public-default"})
 @SpringBootApplication(
         exclude = {
                 RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class, MongoAutoConfiguration.class, TransactionAutoConfiguration.class
         },
 
         scanBasePackages = {"com.spring.boot.tutorial"})
-@MapperScan(value = {"com.spring.boot.tutorial.**.mapper"})
+//@MapperScan(value = {"com.spring.boot.tutorial.**.mapper"})
 public @interface SpringBootStarterAnnotation {
 }

@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.spring.boot.tutorial.swagger.SwaggerConfiguration
+com.spring.boot.tutorial.swagger.SwaggerConfiguration,\
+com.spring.boot.tutorial.advice.interceptor.CustomizeRequestMonitor

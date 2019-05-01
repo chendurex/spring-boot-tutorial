@@ -21,7 +21,6 @@ import java.util.Set;
  * @date 2018-12-22 17:45.
  */
 
-@Configuration
 @ConditionalOnClass(Config.class)
 public class EnableRedissonAutoConfiguration {
     private static final String PASSWORD = "spring.redis.cluster.password";

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: demo-spring-boot-starter
+logging:
+  custom:
+    std:
+      console:
+        enabled: true
+      file:
+        enabled: false

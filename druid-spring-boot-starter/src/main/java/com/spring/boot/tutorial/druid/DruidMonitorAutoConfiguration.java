@@ -10,7 +10,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
@@ -18,7 +17,6 @@ import javax.sql.DataSource;
  * @author cheny.huang
  * @date 2018-08-15 10:27
  */
-@Configuration
 @ConditionalOnClass(DruidDataSource.class)
 @EnableConfigurationProperties(DruidMonitorProperties.class)
 @ConditionalOnProperty(prefix = "spring.druid.monitor",havingValue = "enabled",value = "enabled")

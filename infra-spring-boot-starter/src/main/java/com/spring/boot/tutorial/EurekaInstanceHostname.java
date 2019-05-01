@@ -10,11 +10,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletContext;
-import java.net.*;
-import java.util.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collection;
 
 /**
  * eureka在实现集群的时候，是必须通过eureka.instance.hostname来区别本机与其它的服务
@@ -28,7 +28,6 @@ import java.util.*;
  * @author cheny.huang
  * @date 2018-06-16 20:32.
  */
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class EurekaInstanceHostname implements ServletContextInitializer {
     private final Logger log = LoggerFactory.getLogger(getClass());

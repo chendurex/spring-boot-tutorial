@@ -7,4 +7,5 @@ project(':druid-spring-boot-starter') {
 dependencies {
     compile "org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.0"
     compile 'com.alibaba:druid:1.0.31'
+    compile 'mysql:mysql-connector-java:8.0.13'
 }
