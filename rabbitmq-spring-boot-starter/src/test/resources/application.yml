@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: spring-boot-starter-mq
+  rabbitmq:
+    host: 192.168.2.56
+    port: 5672
+    username: rabbitmq
+    password: rabbitmq
+    mode: auto
+    maxAttempts: 4
+    maxInterval: 40000
+t8t:
+  component:
+    mq:
+      key: spring.boot.test.java.queue
+eureka:
+  client:
+    fetch-registry: false
+    register-with-eureka: false

@@ -7,7 +7,7 @@ package com.spring.boot.tutorial.log;
 public interface DynamicUpdateSystemLog {
     /**
      * 重新设置日志级别
-     * @param name 日志路径,example:com.to8to.sc.eureka.boot
+     * @param name 日志路径,example:com.spring.boot.tutorial.eureka.boot
      * @param level 日志级别,example:info
      */
     void setLog(String name, String level);

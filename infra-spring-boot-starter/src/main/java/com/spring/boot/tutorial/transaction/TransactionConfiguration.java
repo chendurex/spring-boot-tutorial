@@ -107,7 +107,7 @@ public class TransactionConfiguration {
 
     @Bean
     public Advisor defaultPointcutAdvisor(
-            @Value("${spring.transaction.pointcut.expression:execution(* com.to8to..*.service.impl.*.*(..))}")String expression,
+            @Value("${spring.transaction.pointcut.expression:execution(* com.spring.boot.tutorial..*.service.impl.*.*(..))}")String expression,
                                                       TransactionInterceptor transactionInterceptor) {
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(expression);

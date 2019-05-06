@@ -67,7 +67,7 @@ public class SwaggerConfiguration {
                 if (beanProperty.getField() == null) {
                     String v = beanProperty.getGetter().getName().substring(3);
                     // 如果有使用@JsonProperty定义的名称，并且名称并不是简单的大小写形式，那么还是存在产生无用的字段
-                    // 如果要解决，可以采用com.to8to.sc.spring.CustomizePropertyNamingStrategy方法
+                    // 如果要解决，可以采用com.spring.boot.tutorial.spring.CustomizePropertyNamingStrategy方法
                     // 目前可以不用处理，因为这个仅仅是文档工具而已，影响不会很大
                     log.info("移除jackson自动生成的名称:{}", beanProperty.getName());
                     return v;

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DynamicLogListener implements InitializingBean {
     private static final String PREFIX = "logging.level";
-    private static final String ROOT_LOG_LEVEL = "logging.level.com.to8to";
+    private static final String ROOT_LOG_LEVEL = "logging.level.com.spring.boot.tutorial";
     private final DynamicUpdateSystemLog systemLog;
     public DynamicLogListener(DynamicUpdateSystemLog systemLog) {
         this.systemLog = systemLog;

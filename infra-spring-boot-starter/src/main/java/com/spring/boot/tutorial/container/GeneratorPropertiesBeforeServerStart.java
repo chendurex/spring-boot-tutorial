@@ -27,7 +27,7 @@ public class GeneratorPropertiesBeforeServerStart implements ApplicationContextI
     private static final String APOLLO_BOOTSTRAP_ENABLED = "apollo.bootstrap.enabled";
     private static final String APOLLO_BOOTSTRAP_NAMESPACES = "apollo.bootstrap.namespaces";
     private static final String DEFAULT_APOLLO_BOOTSTRAP_ENABLED_VALUE = "true";
-    private static final String DEFAULT_APOLLO_BOOTSTRAP_NAMESPACES_VALUE = "application, private, 1.t8t-sc-public-default";
+    private static final String DEFAULT_APOLLO_BOOTSTRAP_NAMESPACES_VALUE = "application, private";
     private static final String DEFAULT_LOCAL_ENV = "server.local.env";
     private static final String SC_INFRASTRUCTURE_VERSION = "sc.infrastructure.version";
     private static final String DEFAULT_EUREKA_INSTANCE_ID = "eureka.instance.instance-id";
