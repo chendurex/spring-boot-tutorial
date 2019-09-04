@@ -1,0 +1,158 @@
+package com.spring.boot.tutorial.advice.interceptor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+
+/**
+ * <p>打印请求对象，包括请求头/体和响应头/体</p>
+ * <p>因为{@link HandlerInterceptorAdapter}是处理流式内容，如果需要打印请求体和响应体，会导致流无法再次读取</p>
+ * <p>{@link RequestBodyAdvice},{@link ResponseBodyAdvice}解决了打印请求体和响应体，但是只能打印{@link RequestBody}
+ *  {@link ResponseBody}内容，如果以其它格式返回结果则无法打印</p>
+ *  <p>如果上述方案能实现监控内容的情况则使用上诉方案，它们使用简单而且灵活方便，实在没有办法则使用这种原始方案</p>
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice
+ * @see org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
+ * @see org.springframework.web.servlet.handler.HandlerInterceptorAdapter
+ * @see org.springframework.web.bind.annotation.RequestBody
+ * @see org.springframework.web.bind.annotation.ResponseBody
+ * @author yangchen
+ * @date 2019-09-04 16:08
+ */
+public class RequestAndResponseLoggingFilter extends OncePerRequestFilter {
+    private static final Logger log = LoggerFactory.getLogger(RequestAndResponseLoggingFilter.class);
+    private static final List<MediaType> VISIBLE_TYPES = Arrays.asList(
+            MediaType.valueOf("text/*"),
+            MediaType.APPLICATION_FORM_URLENCODED,
+            MediaType.APPLICATION_JSON,
+            MediaType.APPLICATION_XML,
+            MediaType.valueOf("application/*+json"),
+            MediaType.valueOf("application/*+xml"),
+            MediaType.MULTIPART_FORM_DATA
+    );
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        if (isAsyncDispatch(request)) {
+            filterChain.doFilter(request, response);
+        } else {
+            doFilterWrapped(wrapRequest(request), wrapResponse(response), filterChain);
+        }
+    }
+
+    private void doFilterWrapped(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response,
+                                 FilterChain filterChain) throws ServletException, IOException {
+        try {
+            beforeRequest(request, response);
+            filterChain.doFilter(request, response);
+        }
+        finally {
+            afterRequest(request, response);
+            response.copyBodyToResponse();
+        }
+    }
+
+    private void beforeRequest(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response) {
+        if (log.isInfoEnabled()) {
+            logRequestHeader(request, "request header:" + request.getRemoteAddr() + "|>");
+        }
+    }
+
+    private void afterRequest(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response) {
+        if (log.isInfoEnabled()) {
+            logRequestBody(request, "request content:" + request.getRemoteAddr() + "|>");
+            logResponse(response, "response content:"+request.getRemoteAddr() + "|<");
+        }
+    }
+
+    private static void logRequestHeader(ContentCachingRequestWrapper request, String prefix) {
+        String queryString = request.getQueryString();
+        if (queryString == null) {
+            log.info("{} {} {}", prefix, request.getMethod(), request.getRequestURI());
+        } else {
+            log.info("{} {} {}?{}", prefix, request.getMethod(), request.getRequestURI(), queryString);
+        }
+        Enumeration<String> headers = request.getHeaderNames();
+        StringBuilder sb = new StringBuilder();
+        while (headers.hasMoreElements()) {
+            String header = headers.nextElement();
+            sb.append(",").append(header).append("=").append(request.getHeader(header));
+        }
+        log.info("{}{}", prefix, sb.length() > 0 ? sb.substring(1) : "");
+    }
+
+    private static void logRequestBody(ContentCachingRequestWrapper request, String prefix) {
+        byte[] content = request.getContentAsByteArray();
+        if (content.length > 0) {
+            logContent(content, request.getContentType(), request.getCharacterEncoding(), prefix);
+        }
+    }
+
+    private static void logResponse(ContentCachingResponseWrapper response, String prefix) {
+        int status = response.getStatus();
+        log.info("{} {} {}", prefix, status, HttpStatus.valueOf(status).getReasonPhrase());
+        Collection<String> headers = response.getHeaderNames();
+        StringBuilder sb = new StringBuilder();
+        for (String header : headers) {
+            sb.append(",").append(header).append("=").append(response.getHeader(header));
+        }
+        if (sb.length() > 0) {
+            log.info("{}{}", prefix, sb.substring(1));
+        }
+        byte[] content = response.getContentAsByteArray();
+        if (content.length > 0) {
+            logContent(content, response.getContentType(), response.getCharacterEncoding(), prefix);
+        }
+    }
+
+    private static void logContent(byte[] content, String contentType, String contentEncoding, String prefix) {
+        MediaType mediaType = MediaType.valueOf(contentType);
+        boolean visible = VISIBLE_TYPES.stream().anyMatch(visibleType -> visibleType.includes(mediaType));
+        if (visible) {
+            try {
+                log.info("{} {}", prefix, new String(content, contentEncoding));
+            } catch (UnsupportedEncodingException e) {
+                log.info("{} [{} bytes content]", prefix, content.length);
+            }
+        } else {
+            log.info("{} [{} bytes content]", prefix, content.length);
+        }
+    }
+
+    private static ContentCachingRequestWrapper wrapRequest(HttpServletRequest request) {
+        if (request instanceof ContentCachingRequestWrapper) {
+            return (ContentCachingRequestWrapper) request;
+        } else {
+            return new ContentCachingRequestWrapper(request);
+        }
+    }
+
+    private static ContentCachingResponseWrapper wrapResponse(HttpServletResponse response) {
+        if (response instanceof ContentCachingResponseWrapper) {
+            return (ContentCachingResponseWrapper) response;
+        } else {
+            return new ContentCachingResponseWrapper(response);
+        }
+    }
+}
+
