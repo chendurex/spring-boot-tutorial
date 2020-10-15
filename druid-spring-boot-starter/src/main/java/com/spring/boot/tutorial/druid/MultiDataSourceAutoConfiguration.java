@@ -1,8 +1,10 @@
 package com.spring.boot.tutorial.druid;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -21,6 +23,7 @@ import java.util.Set;
  */
 @ConditionalOnClass(value = {DruidDataSource.class, DruidAutoConfiguration.class})
 @EnableConfigurationProperties(value = {MultiDataSourceProperties.class, DruidProperties.class})
+@AutoConfigureBefore(DataSourceAutoConfiguration.class)
 @ConditionalOnProperty(value = "spring.druid.multi-datasource.enabled", havingValue = "true")
 public class MultiDataSourceAutoConfiguration {
     private static final String DEFAULT_DATASOURCE = "default";
